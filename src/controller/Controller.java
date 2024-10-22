@@ -15,11 +15,13 @@ public class Controller {
         this.scanner = new Scanner(System.in);
     }
 
-    public void handlePlayerAction(String playerInput, int row, int col) {
-        boolean validMove = model.placeWord(playerInput, row, col);
+    public void handlePlayerAction(String playerInput, int row, int col, String direction) {
+        boolean validMove = model.placeWord(playerInput, row, col, direction);
         if (validMove) {
             int score = model.calculateScore(playerInput);
             model.addScoreToCurrentPlayer(score);
+        } else {
+            System.out.println("Invalid move. Try again.");
         }
     }
 
@@ -35,16 +37,19 @@ public class Controller {
                 continue;
             }
 
-            System.out.println("Enter row and column:");
+            System.out.println("Enter row, column, and direction (horizontal/vertical):");
             try {
                 int row = scanner.nextInt();
                 int col = scanner.nextInt();
+                String direction = scanner.next();
+                scanner.nextLine(); // Consume newline
+
                 if (row < 0 || row >= model.getBoardSize() || col < 0 || col >= model.getBoardSize()) {
                     System.out.println("Invalid row or column. Please try again.");
                     continue;
                 }
-                scanner.nextLine(); // Consume newline
-                handlePlayerAction(input, row, col);
+
+                handlePlayerAction(input, row, col, direction);
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter valid integers for row and column.");
                 scanner.nextLine(); // Clear invalid input

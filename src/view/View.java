@@ -20,7 +20,6 @@ public class View implements ModelListener {
                 System.out.print((cell == '\0' ? '.' : cell) + " ");
             }
             System.out.println();
-
         }
     }
 
