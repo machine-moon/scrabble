@@ -1,7 +1,12 @@
 package model;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 // Represents the game model
 public class Model {
@@ -9,12 +14,27 @@ public class Model {
     private List<Player> players; // List of players
     private int currentPlayerIndex; // Index of the current player
     private List<ModelListener> listeners; // Listeners to notify view updates
+    private Set<String> validWords; // Set of valid words
 
-    public Model(int boardSize) {
+    public Model(int boardSize, String wordListPath) {
         board = new char[boardSize][boardSize];
         players = new ArrayList<>();
         currentPlayerIndex = 0;
         listeners = new ArrayList<>();
+        validWords = new HashSet<>();
+        loadWordList(wordListPath); // Load the word list
+    }
+
+    // Load the word list from a file
+    private void loadWordList(String filePath) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                validWords.add(line.trim().toLowerCase());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // Add a listener to notify the view
@@ -55,34 +75,43 @@ public class Model {
         return board.length;
     }
 
+    // Verify if a word is valid using the local word list
+    private boolean isValidWord(String word) {
+        return validWords.contains(word.toLowerCase());
+    }
+
     // Place a word on the board
-    public boolean placeWord(String word, int row, int column, String direction) {
+    public String placeWord(String word, int row, int column, String direction) {
+        if (!isValidWord(word)) {
+            return "Invalid word.";
+        }
+
         int rows = board.length;
         int cols = board[0].length;
         int wordLength = word.length();
 
         if (direction.equals("horizontal")) {
             if (column + wordLength > cols) {
-                return false;
+                return "Word goes out of the board horizontally.";
             }
             for (int i = 0; i < wordLength; i++) {
                 char currentChar = board[row][column + i];
                 if (currentChar != '\0' && currentChar != word.charAt(i)) {
-                    return false;
+                    return "Word overlaps with another word.";
                 }
             }
         } else if (direction.equals("vertical")) {
             if (row + wordLength > rows) {
-                return false;
+                return "Word goes out of the board vertically.";
             }
             for (int i = 0; i < wordLength; i++) {
                 char currentChar = board[row + i][column];
                 if (currentChar != '\0' && currentChar != word.charAt(i)) {
-                    return false;
+                    return "Word overlaps with another word.";
                 }
             }
         } else {
-            return false; // Invalid direction
+            return "Invalid direction.";
         }
 
         // Place the word on the board
@@ -97,10 +126,10 @@ public class Model {
         }
 
         notifyView(); // Notify view of the update
-        return true;
+        return "Word placed successfully.";
     }
 
-    // Calculate the score for a word (placeholder method)
+    // Calculate the score for a word based on its length
     public int calculateScore(String word) {
         return word.length(); // Simple scoring: 1 point per letter
     }

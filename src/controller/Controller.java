@@ -16,12 +16,12 @@ public class Controller {
     }
 
     public void handlePlayerAction(String playerInput, int row, int col, String direction) {
-        boolean validMove = model.placeWord(playerInput, row, col, direction);
-        if (validMove) {
+        String result = model.placeWord(playerInput, row, col, direction);
+        if (result.equals("Word placed successfully.")) {
             int score = model.calculateScore(playerInput);
             model.addScoreToCurrentPlayer(score);
         } else {
-            System.out.println("Invalid move. Try again.");
+            System.out.println(result);
         }
     }
 
