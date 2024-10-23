@@ -5,6 +5,9 @@
 - Mithushan Ravichandramohan, Tarek Ibrahim, Arjun Pathak, Manit Jawa
 - SYSC 3110 - Fall 2024
 
+## Note
+wordlist.txt must be in same dir when executing scrabble.jar or pass path/to/wordlist.txt
+
 ## Project Overview
 
 This project is a simple implementation of the Scrabble game. It follows the Model-View-Controller (MVC) design pattern, where each component has a clear and distinct responsibility. The game allows players to participate and score points based on the standard Scrabble rules.
