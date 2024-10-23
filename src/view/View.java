@@ -3,16 +3,27 @@ package view;
 import model.Model;
 import model.ModelListener;
 
-// Represents the game view
+/**
+ * Represents the view in the MVC pattern. Listens to model updates and displays
+ * the game state to the user.
+ */
 public class View implements ModelListener {
+
     private Model model; // Reference to the model
 
+    /**
+     * Constructs a View with the specified model.
+     *
+     * @param model the model to be used by the view
+     */
     public View(Model model) {
         this.model = model;
         model.addListener(this); // Add this view as a listener to the model
     }
 
-    // Display the current state of the board to the user
+    /**
+     * Displays the current state of the board to the user.
+     */
     public void displayBoard() {
         char[][] board = model.getBoard();
         for (char[] row : board) {
@@ -23,21 +34,29 @@ public class View implements ModelListener {
         }
     }
 
-    // Display player status
+    /**
+     * Displays the current player's status.
+     */
     public void displayPlayerStatus() {
         System.out.println("Current player: " + model.getCurrentPlayer().getName());
         System.out.println("Score: " + model.getCurrentPlayer().getScore());
     }
 
-    // Display a message to the user
+    /**
+     * Displays a message to the user.
+     *
+     * @param message the message to display
+     */
     public void showMessage(String message) {
         System.out.println(message);
     }
 
-    // Update the view when notified by the model
+    /**
+     * Updates the view when notified by the model.
+     */
     @Override
     public void update() {
-        displayBoard(); // Update the board display
-        displayPlayerStatus(); // Update player status display
+        displayBoard();
+        displayPlayerStatus();
     }
 }

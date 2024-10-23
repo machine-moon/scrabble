@@ -8,14 +8,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-// Represents the game model
+/**
+ * Represents the game model.
+ */
 public class Model {
-    private char[][] board; // Game board
-    private List<Player> players; // List of players
-    private int currentPlayerIndex; // Index of the current player
-    private List<ModelListener> listeners; // Listeners to notify view updates
-    private Set<String> validWords; // Set of valid words
 
+    private char[][] board;                 // Game board
+    private List<Player> players;           // List of players
+    private int currentPlayerIndex;         // Index of the current player
+    private List<ModelListener> listeners;  // Listeners to notify view updates
+    private Set<String> validWords;         // Set of valid words
+
+    /**
+     * Constructs a Model with the specified board size and word list path.
+     *
+     * @param boardSize the size of the game board
+     * @param wordListPath the path to the word list file
+     */
     public Model(int boardSize, String wordListPath) {
         board = new char[boardSize][boardSize];
         players = new ArrayList<>();
@@ -25,62 +34,103 @@ public class Model {
         loadWordList(wordListPath); // Load the word list
     }
 
-    // Load the word list from a file
+    /**
+     * Loads the word list from a file.
+     *
+     * @param filePath the path to the word list file
+     */
     private void loadWordList(String filePath) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        try (BufferedReader buffer = new BufferedReader(new FileReader(filePath))) {
             String line;
-            while ((line = br.readLine()) != null) {
-                validWords.add(line.trim().toLowerCase());
+            while ((line = buffer.readLine()) != null) {
+                validWords.add(line.trim().toLowerCase()); // Add words to the set (lowercase)
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Handle file reading errors
         }
     }
 
-    // Add a listener to notify the view
+    /**
+     * Adds a listener to notify the view.
+     *
+     * @param listener the listener to add
+     */
     public void addListener(ModelListener listener) {
         listeners.add(listener);
     }
 
-    // Notify all listeners about the model changes
+    /**
+     * Notifies all listeners about the model changes.
+     */
     private void notifyView() {
         for (ModelListener listener : listeners) {
             listener.update();
         }
     }
 
-    // Add a player to the game
+    /**
+     * Adds a player to the game.
+     *
+     * @param player the player to add
+     */
     public void addPlayer(Player player) {
         players.add(player);
     }
 
-    // Get the current player
+    /**
+     * Gets the current player.
+     *
+     * @return the current player
+     */
     public Player getCurrentPlayer() {
         return players.get(currentPlayerIndex);
     }
 
-    // Move to the next player's turn
+    /**
+     * Moves to the next player's turn.
+     */
     public void nextTurn() {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         notifyView();
     }
 
-    // Get the current game board
+    /**
+     * Gets the current game board.
+     *
+     * @return a copy of the board
+     */
     public char[][] getBoard() {
         return board;
     }
 
-    // Get the board size
+    /**
+     * Gets the board size.
+     *
+     * @return the board size
+     */
     public int getBoardSize() {
         return board.length;
     }
 
-    // Verify if a word is valid using the local word list
+    /**
+     * Verifies if a word is valid using the local word list.
+     *
+     * @param word the word to verify
+     * @return true if the word is valid, false otherwise
+     */
     private boolean isValidWord(String word) {
         return validWords.contains(word.toLowerCase());
     }
 
-    // Place a word on the board
+    /**
+     * Places a word on the board.
+     *
+     * @param word the word to place
+     * @param row the starting row
+     * @param column the starting column
+     * @param direction the direction ("horizontal" or "vertical")
+     * @return a message indicating the result of the operation
+     */
     public String placeWord(String word, int row, int column, String direction) {
         if (!isValidWord(word)) {
             return "Invalid word.";
@@ -90,6 +140,7 @@ public class Model {
         int cols = board[0].length;
         int wordLength = word.length();
 
+        // handle out of bounds and overlapping cases
         if (direction.equals("horizontal")) {
             if (column + wordLength > cols) {
                 return "Word goes out of the board horizontally.";
@@ -129,18 +180,31 @@ public class Model {
         return "Word placed successfully.";
     }
 
-    // Calculate the score for a word based on its length
+    /**
+     * Calculates the score for a word based on its length.
+     *
+     * @param word the word to score
+     * @return the score of the word
+     */
     public int calculateScore(String word) {
         return word.length(); // Simple scoring: 1 point per letter
     }
 
-    // Add score to the current player
+    /**
+     * Adds score to the current player.
+     *
+     * @param score the score to add
+     */
     public void addScoreToCurrentPlayer(int score) {
         getCurrentPlayer().addScore(score);
         notifyView();
     }
 
-    // Check if the game is over (placeholder method)
+    /**
+     * Checks if the game is over.
+     *
+     * @return true if the game is over, false otherwise
+     */
     public boolean isGameOver() {
         // Placeholder logic: game ends when a player reaches 100 points
         for (Player player : players) {
@@ -151,7 +215,9 @@ public class Model {
         return false;
     }
 
-    // Display final scores
+    /**
+     * Displays the final scores.
+     */
     public void displayFinalScores() {
         System.out.println("Game Over! Final Scores:");
         for (Player player : players) {
