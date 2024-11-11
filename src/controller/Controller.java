@@ -61,24 +61,27 @@ public class Controller implements UserActionListener, ModelObserver {
         submitTurn();
     }
 
-    // Submit the turn
+
     public void submitTurn() {
         boolean success = model.submitWord();
+
         if (success) {
-            view.showMessage("Word accepted! Your score has been updated.");
-            if (model.isGameOver()) {
-                endGame();
+            if (model.isFirstTurn() && !model.isCenterCovered()) {
+                view.showMessage("First word must be placed covering the center square.");
+                model.restorePlayerTiles();
             } else {
-                model.nextTurn();
+                view.showMessage("Word accepted! Your score has been updated.");
+                model.nextTurn(); // Move to the next player
+                if (model.isGameOver()) {
+                    endGame();
+                }
             }
-        } else if (model.isFirstTurn()) {
-            view.showMessage("First Word should be placed in the center");
-            model.restorePlayerTiles();
         } else {
             view.showMessage("Invalid word! Please try again.");
             model.restorePlayerTiles();
         }
     }
+
 
     // End the game
     private void endGame() {

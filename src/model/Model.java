@@ -211,6 +211,11 @@ public class Model {
                 return 0;
         }
     }
+    public boolean isCenterCovered() {
+        int center = boardSize / 2;
+        return board[center][center] != '\0'; // Check if the center tile is occupied
+    }
+
 
     // Apply placements to the main board (already done during placement)
     private void applyPlacements() {
