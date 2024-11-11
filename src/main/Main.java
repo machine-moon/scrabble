@@ -1,3 +1,4 @@
+// File: src/main/Main.java
 package main;
 
 import controller.Controller;
@@ -7,14 +8,25 @@ import view.View;
 
 public class Main {
     public static void main(String[] args) {
-        Model model = new Model(15); // Standard Scrabble board size is 15x15
-        View view = new View(model); // Create the view with a reference to the model
-        Controller controller = new Controller(model); //Create the controller
+        // Initialize the model with a 15x15 board
+        Model model = new Model(15);
 
-        // Add players
+        // Add players to the game
         model.addPlayer(new Player("Alice"));
         model.addPlayer(new Player("Bob"));
 
-        controller.startGame(); // Start the game loop
+        // Initialize the view
+        View view = new View();
+
+        // Initialize the controller
+        Controller controller = new Controller(model, view);
+
+        // Initialize the board and tile rack in the view
+        view.initializeBoard(model.getBoardSize());
+        view.initializeTileRack(model.getCurrentPlayer().getTiles());
+        view.updateStatus("Current player: " + model.getCurrentPlayer().getName() + " | Score: " + model.getCurrentPlayer().getScore());
+
+        // Start the game
+        controller.startGame();
     }
 }

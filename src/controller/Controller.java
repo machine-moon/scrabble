@@ -1,67 +1,110 @@
+// File: src/controller/Controller.java
 package controller;
 
 import model.Model;
 import model.Player;
+import model.ModelObserver;
+import view.View;
 
-import java.util.Scanner;
-import java.util.InputMismatchException;
+import java.util.List;
 
-public class Controller {
+public class Controller implements UserActionListener, ModelObserver {
     private Model model;
-    private Scanner scanner;
+    private View view;
+    private Character selectedTile;
 
-    public Controller(Model model) {
+    public Controller(Model model, View view) {
         this.model = model;
-        this.scanner = new Scanner(System.in);
+        this.view = view;
+        this.selectedTile = null;
+
+        // Set the action listener in the view
+        view.setUserActionListener(this);
+
+        // Register as an observer of the model
+        this.model.addObserver(this);
     }
 
-    public void handlePlayerAction(String playerInput, int row, int col, String direction) {
-        boolean validMove = model.placeWord(playerInput, row, col, direction);
-        if (validMove) {
-            int score = model.calculateScore(playerInput);
-            model.addScoreToCurrentPlayer(score);
-        } else {
-            System.out.println("Invalid move. Try again.");
-        }
+    // UserActionListener methods
+    @Override
+    public void onTileSelected(char tile) {
+        selectedTile = tile;
     }
 
-    public void startGame() {
-        while (true) {
+    @Override
+    public void onBoardCellClicked(int row, int col) {
+        if (selectedTile != null) {
             Player currentPlayer = model.getCurrentPlayer();
-            System.out.println("It's " + currentPlayer.getName() + "'s turn.");
-
-            System.out.println("Enter the word to place (or 'pass'):");
-            String input = scanner.nextLine();
-            if (input.equalsIgnoreCase("pass")) {
-                model.nextTurn();
-                continue;
-            }
-
-            System.out.println("Enter row, column, and direction (horizontal/vertical):");
-            try {
-                int row = scanner.nextInt();
-                int col = scanner.nextInt();
-                String direction = scanner.next();
-                scanner.nextLine(); // Consume newline
-
-                if (row < 0 || row >= model.getBoardSize() || col < 0 || col >= model.getBoardSize()) {
-                    System.out.println("Invalid row or column. Please try again.");
-                    continue;
+            if (currentPlayer.hasTile(selectedTile)) {
+                boolean success = model.placeTile(selectedTile, row, col);
+                if (success) {
+                    // Remove the tile from the player's rack
+                    currentPlayer.removeTile(selectedTile);
+                    // Update the view
+                    view.disableTileButton(selectedTile);
+                    view.deselectTile();
+                    selectedTile = null;
+                } else {
+                    view.showMessage("Invalid tile placement. Try again.");
                 }
-
-                handlePlayerAction(input, row, col, direction);
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter valid integers for row and column.");
-                scanner.nextLine(); // Clear invalid input
-                continue;
+            } else {
+                view.showMessage("You don't have that tile.");
+                selectedTile = null;
             }
-
-            model.nextTurn();
-
-            if (model.isGameOver()) {
-                model.displayFinalScores();
-                break;
-            }
+        } else {
+            view.showMessage("Please select a tile first.");
         }
+    }
+
+    @Override
+    public void onSubmitButtonClicked() {
+        submitTurn();
+    }
+
+    // Submit the turn
+    public void submitTurn() {
+        boolean success = model.submitWord();
+        if (success) {
+            view.showMessage("Word accepted! Your score has been updated.");
+            if (model.isGameOver()) {
+                endGame();
+            } else {
+                model.nextTurn();
+            }
+        } else if (model.isFirstTurn()) {
+            view.showMessage("First Word should be placed in the center");
+            model.restorePlayerTiles();
+        } else {
+            view.showMessage("Invalid word! Please try again.");
+            model.restorePlayerTiles();
+        }
+    }
+
+    // End the game
+    private void endGame() {
+        List<Player> players = model.getPlayers();
+        StringBuilder finalScores = new StringBuilder("Game Over! Final Scores:\n");
+        for (Player player : players) {
+            finalScores.append(player.getName())
+                    .append(": ")
+                    .append(player.getScore())
+                    .append("\n");
+        }
+        view.showMessage(finalScores.toString());
+    }
+
+    // Start the game
+    public void startGame() {
+        onModelChanged();
+    }
+
+    // ModelObserver method
+    @Override
+    public void onModelChanged() {
+        view.updateBoard(model.getBoardState());
+        view.updateTileRack(model.getCurrentPlayer().getTiles());
+        String status = "Current player: " + model.getCurrentPlayer().getName() +
+                " | Score: " + model.getCurrentPlayer().getScore();
+        view.updateStatus(status);
     }
 }
