@@ -3,10 +3,9 @@ package model;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.Random;
+
 
 /**
  * Represents the game model.
@@ -18,6 +17,7 @@ public class Model {
     private int currentPlayerIndex;         // Index of the current player
     private List<ModelListener> listeners;  // Listeners to notify view updates
     private Set<String> validWords;         // Set of valid words
+    private Map<String, Integer> tiles;
 
     /**
      * Constructs a Model with the specified board size and word list path.
@@ -28,10 +28,42 @@ public class Model {
     public Model(int boardSize, String wordListPath) {
         board = new char[boardSize][boardSize];
         players = new ArrayList<>();
+        tiles = new HashMap<>();
+        Bag();
         currentPlayerIndex = 0;
         listeners = new ArrayList<>();
         validWords = new HashSet<>();
         loadWordList(wordListPath); // Load the word list
+    }
+
+    private void Bag() {
+        tiles.put("A", 9);
+        tiles.put("B", 2);
+        tiles.put("C", 2);
+        tiles.put("D", 4);
+        tiles.put("E", 12);
+        tiles.put("F", 2);
+        tiles.put("G", 3);
+        tiles.put("H", 2);
+        tiles.put("I", 9);
+        tiles.put("J", 1);
+        tiles.put("K", 1);
+        tiles.put("L", 4);
+        tiles.put("M", 2);
+        tiles.put("N", 6);
+        tiles.put("O", 8);
+        tiles.put("P", 2);
+        tiles.put("Q", 1);
+        tiles.put("R", 6);
+        tiles.put("S", 4);
+        tiles.put("T", 6);
+        tiles.put("U", 4);
+        tiles.put("V", 2);
+        tiles.put("W", 2);
+        tiles.put("X", 1);
+        tiles.put("Y", 2);
+        tiles.put("Z", 1);
+        tiles.put("Blank", 2);
     }
 
     /**
@@ -223,5 +255,22 @@ public class Model {
         for (Player player : players) {
             System.out.println(player.getName() + ": " + player.getScore());
         }
+    }
+
+    /**
+     * Returns a random tile from the bag of tiles
+     * @return
+     */
+    public String getTile(){
+        Random random = new Random();
+        int randomInt = random.nextInt(27);
+        int counter = 0;
+        for (String key: tiles.keySet()) {
+            if (counter == randomInt){
+                tiles.put(key, tiles.get(key) - 1);
+                return key;
+            }
+        }
+        return "";
     }
 }
