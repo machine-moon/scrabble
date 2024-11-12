@@ -259,7 +259,7 @@ public class Model {
 
     /**
      * Returns a random tile from the bag of tiles
-     * @return
+     * @return String: a random alphabet
      */
     public String getTile(){
         Random random = new Random();

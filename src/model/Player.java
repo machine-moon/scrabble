@@ -1,5 +1,8 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents a player in the game.
  */
@@ -7,6 +10,7 @@ public class Player {
 
     private String name;
     private int score;
+    public List<String> playerTiles;
 
     /**
      * Constructs a Player with the specified name.
@@ -16,6 +20,7 @@ public class Player {
     public Player(String name) {
         this.name = name;
         this.score = 0;
+        this.playerTiles = new ArrayList<>();
     }
 
     /**
@@ -43,5 +48,22 @@ public class Player {
      */
     public void addScore(int points) {
         this.score += points;
+    }
+
+    public boolean addTiles(List<String> tileList) {
+        int tilesCount = 0;
+        if (playerTiles.size() < 7){
+            tilesCount = playerTiles.size();
+            for (String c: tileList) {
+                if (playerTiles.size() < 7) {
+                    playerTiles.add(c);
+                    tilesCount++;
+                }
+            }
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 }
