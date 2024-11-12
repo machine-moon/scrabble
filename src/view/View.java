@@ -1,4 +1,3 @@
-// File: src/view/View.java
 package view;
 
 import controller.UserActionListener;
@@ -45,7 +44,15 @@ public class View extends JFrame {
                 actionListener.onSubmitButtonClicked();
             }
         });
+        JButton skipTurnButton = new JButton("Skip Turn");
+        skipTurnButton.addActionListener(e -> {
+                    if (actionListener != null) {
+                        actionListener.onSkipTurnClicked();
+                    }
+                });
         add(submitButton, BorderLayout.EAST);
+        add(skipTurnButton, BorderLayout.WEST);
+
 
         setVisible(true);
     }

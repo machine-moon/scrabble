@@ -1,4 +1,3 @@
-// File: src/model/Model.java
 package model;
 
 import java.io.BufferedReader;

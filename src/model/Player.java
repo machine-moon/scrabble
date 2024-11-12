@@ -1,4 +1,3 @@
-// File: src/model/Player.java
 package model;
 
 import java.util.ArrayList;

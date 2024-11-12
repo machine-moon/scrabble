@@ -1,4 +1,3 @@
-// File: src/controller/Controller.java
 package controller;
 
 import model.Model;
@@ -23,6 +22,11 @@ public class Controller implements UserActionListener, ModelObserver {
 
         // Register as an observer of the model
         this.model.addObserver(this);
+
+        view.initializeBoard(model.getBoardSize());
+        view.initializeTileRack(model.getCurrentPlayer().getTiles());
+        view.updateStatus("Current player: " + model.getCurrentPlayer().getName() + " | Score: " + model.getCurrentPlayer().getScore());
+
     }
 
     // UserActionListener methods
@@ -55,6 +59,11 @@ public class Controller implements UserActionListener, ModelObserver {
             view.showMessage("Please select a tile first.");
         }
     }
+    public void onSkipTurnClicked() {
+        model.restorePlayerTiles();
+        model.nextTurn(); // Skip to the next player’s turn
+    }
+
 
     @Override
     public void onSubmitButtonClicked() {
@@ -95,6 +104,7 @@ public class Controller implements UserActionListener, ModelObserver {
         }
         view.showMessage(finalScores.toString());
     }
+
 
     // Start the game
     public void startGame() {
