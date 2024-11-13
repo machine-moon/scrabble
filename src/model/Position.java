@@ -1,4 +1,3 @@
-// File: src/model/Position.java
 package model;
 
 public class Position {
