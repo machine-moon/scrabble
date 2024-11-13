@@ -10,7 +10,7 @@ public class Player {
 
     private String name;
     private int score;
-    public List<String> tiles;
+    public List<Character> tiles;
 
     /**
      * Constructs a Player with the specified name.
@@ -72,8 +72,8 @@ public class Player {
     }
 
     // Remove a tile from the player's rack
-    public boolean removeTile(char tile) {
-        return tiles.remove(Character.valueOf(tile));
+    public void removeTile(char tile) {
+        tiles.remove(tile);
     }
 
     // Replenish the player's tiles to a maximum of 7 from the TileBag
