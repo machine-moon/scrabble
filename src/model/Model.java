@@ -15,12 +15,17 @@ public class Model {
     private int currentPlayerIndex;
     private TileBag tileBag;
     private List<ModelObserver> observers;
-    private Set<String> dictionary;
+    private Set<String> wordlist;
     private int boardSize;
     private Map<Position, Character> currentTurnPlacements;
     private boolean isFirstTurn;
 
 
+    /**
+     * Initializes the game model with the specified board size.
+     *
+     * @param boardSize the size of the board (e.g., 15 for a 15x15 board)
+     */
     public Model(int boardSize) {
         this.boardSize = boardSize;
         this.board = new char[boardSize][boardSize];
@@ -28,13 +33,18 @@ public class Model {
         this.currentPlayerIndex = 0;
         this.tileBag = new TileBag();
         this.observers = new ArrayList<>();
-        this.dictionary = loadDictionary("src/model/words_alpha.txt");
+        this.wordlist = loadWordList("src/model/words_alpha.txt");
         this.currentTurnPlacements = new HashMap<>();
         this.isFirstTurn = true;
     }
 
-    // Load dictionary from words_alpha.txt
-    private Set<String> loadDictionary(String fileName) {
+    /**
+     * Loads a word list from a file.
+     *
+     * @param fileName the name of the file to load
+     * @return a set of words loaded from the file
+     */
+    private Set<String> loadWordList(String fileName) {
         Set<String> words = new HashSet<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
@@ -62,7 +72,6 @@ public class Model {
      *
      * @return the current player
      */
-    // Place a tile on the board
     public boolean placeTile(char tile, int row, int col) {
         if (!isValidPosition(row, col)) {
             return false; // Invalid position
@@ -80,11 +89,20 @@ public class Model {
         return true;
     }
 
+    /**
+     * Checks if it is the first turn of the game.
+     *
+     * @return true if it is the first turn, false otherwise
+     */
     public boolean isFirstTurn() {
         return isFirstTurn;
     }
 
-    // Submit the turn: validate all new words and update the board
+    /**
+     * Submits the current word placements and updates the game state.
+     *
+     * @return true if the word placements are valid, false otherwise
+     */
     public boolean submitWord() {
         List<String> newWords = getAllNewWords();
         if (newWords.isEmpty()) {
@@ -124,7 +142,11 @@ public class Model {
         return true;
     }
 
-    // Get all new words formed by the current turn's placements
+    /**
+     * Gets all new words formed by the current turn's placements.
+     *
+     * @return a list of new words
+     */
     private List<String> getAllNewWords() {
         List<String> newWords = new ArrayList<>();
         Set<String> uniqueWords = new HashSet<>(); // To avoid duplicate words
@@ -148,7 +170,14 @@ public class Model {
         return newWords;
     }
 
-    // Helper method to get a word at a given position in a given direction
+    /**
+     * Gets the word at the specified position in the given direction.
+     *
+     * @param row          the row of the starting position
+     * @param col          the column of the starting position
+     * @param isHorizontal true if the word is horizontal, false if it is vertical
+     * @return the word at the specified position
+     */
     private String getWordAtPosition(int row, int col, boolean isHorizontal) {
         StringBuilder word = new StringBuilder();
         int deltaRow = isHorizontal ? 0 : -1;
@@ -176,12 +205,22 @@ public class Model {
         return word.toString();
     }
 
-    // Validate if the word exists in the dictionary
+    /**
+     * Validates a word against the dictionary.
+     *
+     * @param word the word to validate
+     * @return true if the word is valid, false otherwise
+     */
     public boolean validateWord(String word) {
-        return dictionary.contains(word.toLowerCase());
+        return wordlist.contains(word.toLowerCase());
     }
 
-    // Calculate total score for all new words
+    /**
+     * Calculates the total score for a list of words.
+     *
+     * @param words the list of words to calculate the score for
+     * @return the total score
+     */
     private int calculateTotalScore(List<String> words) {
         int total = 0;
         for (String word : words) {
@@ -190,7 +229,12 @@ public class Model {
         return total;
     }
 
-    // Calculate score for a single word
+    /**
+     * Calculates the score for a word.
+     *
+     * @param word the word to calculate the score for
+     * @return the score for the word
+     */
     private int calculateWordScore(String word) {
         int score = 0;
         // Implement premium squares logic here (to be done in Milestone 3)
@@ -201,35 +245,66 @@ public class Model {
         return score;
     }
 
-    // Get the tile score based on Scrabble letter values
+    /**
+     * Gets the score for a tile based on Scrabble letter values.
+     *
+     * @param tile the tile to get the score for
+     * @return the score for the tile
+     */
     private int getTileScore(char tile) {
         switch (Character.toUpperCase(tile)) {
-            case 'A': case 'E': case 'I': case 'O': case 'N': case 'R':
-            case 'T': case 'L': case 'S': case 'U':
+            case 'A':
+            case 'E':
+            case 'I':
+            case 'O':
+            case 'N':
+            case 'R':
+            case 'T':
+            case 'L':
+            case 'S':
+            case 'U':
                 return 1;
-            case 'D': case 'G':
+            case 'D':
+            case 'G':
                 return 2;
-            case 'B': case 'C': case 'M': case 'P':
+            case 'B':
+            case 'C':
+            case 'M':
+            case 'P':
                 return 3;
-            case 'F': case 'H': case 'V': case 'W': case 'Y':
+            case 'F':
+            case 'H':
+            case 'V':
+            case 'W':
+            case 'Y':
                 return 4;
             case 'K':
                 return 5;
-            case 'J': case 'X':
+            case 'J':
+            case 'X':
                 return 8;
-            case 'Q': case 'Z':
+            case 'Q':
+            case 'Z':
                 return 10;
             default:
                 return 0;
         }
     }
+
+    /**
+     * Checks if the center of the board is covered.
+     *
+     * @return true if the center is covered, false otherwise
+     */
     public boolean isCenterCovered() {
         int center = boardSize / 2;
         return board[center][center] != '\0'; // Check if the center tile is occupied
     }
 
 
-    // Apply placements to the main board (already done during placement)
+    /**
+     * Applies the current turn's placements to the main board.
+     */
     private void applyPlacements() {
         // Since we placed tiles directly on the main board in placeTile(), no action needed
     }
@@ -240,6 +315,10 @@ public class Model {
     }
 
     // Revert placements if invalid (used for first turn center coverage)
+
+    /**
+     * Reverts the current turn's placements.
+     */
     private void revertPlacements() {
         for (Position pos : currentTurnPlacements.keySet()) {
             board[pos.row][pos.col] = '\0';
@@ -247,17 +326,30 @@ public class Model {
         clearPlacements();
     }
 
-    // Check if the first word covers the center
+    /**
+     * Checks if the first word covers the center of the board.
+     *
+     * @return true if the center is covered, false otherwise
+     */
     private boolean coversCenter() {
         int center = boardSize / 2;
         return board[center][center] != '\0';
     }
 
-    // Get the current game board state (including temporary placements)
+    /**
+     * Gets the current game board state.
+     *
+     * @return the current game board state
+     */
     public char[][] getBoardState() {
         return board;
     }
 
+    /**
+     * Gets the current player's tiles.
+     *
+     * @return the current player's tiles
+     */
     public Player getCurrentPlayer() {
         return players.get(currentPlayerIndex);
     }
@@ -270,29 +362,46 @@ public class Model {
         notifyObservers();
     }
 
-    // Check if the game is over
+    /**
+     * Checks if the game is over.
+     *
+     * @return true if the game is over, false otherwise
+     */
     public boolean isGameOver() {
         // Example condition: when the tile bag is empty and a player has no tiles left
         return tileBag.isEmpty() && players.stream().anyMatch(player -> player.getTiles().isEmpty());
     }
 
-    // Get list of players
+    /**
+     * Gets the list of players.
+     *
+     * @return the list of players
+     */
     public List<Player> getPlayers() {
         return players;
     }
 
-    // Observer pattern methods
+    /**
+     * Adds an observer to the model.
+     *
+     * @param observer the observer to add
+     */
     public void addObserver(ModelObserver observer) {
         observers.add(observer);
     }
 
+    /**
+     * Notifies all observers that the model has changed.
+     */
     private void notifyObservers() {
         for (ModelObserver observer : observers) {
             observer.onModelChanged();
         }
     }
 
-    // Additional methods for restoring tiles after invalid submission
+    /**
+     * Restores the current player's tiles after an invalid submission.
+     */
     public void restorePlayerTiles() {
         Player currentPlayer = getCurrentPlayer();
         for (Position pos : currentTurnPlacements.keySet()) {
@@ -304,12 +413,22 @@ public class Model {
         notifyObservers();
     }
 
-    // Utility method to check if a position is within the board
+    /**
+     * Checks if a position is within the board.
+     *
+     * @param row the row of the position
+     * @param col the column of the position
+     * @return true if the position is valid, false otherwise
+     */
     private boolean isValidPosition(int row, int col) {
         return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
     }
 
-    // Getter for board size
+    /**
+     * Gets the size of the board.
+     *
+     * @return the size of the board
+     */
     public int getBoardSize() {
         return boardSize;
     }

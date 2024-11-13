@@ -7,6 +7,11 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The View class represents the GUI of the Scrabble game.
+ * It is responsible for displaying the game board, tile rack, and status messages to the user.
+ * It also handles user input and forwards it to the controller.
+ */
 public class View extends JFrame {
     private UserActionListener actionListener;
     private JPanel boardPanel;
@@ -15,6 +20,10 @@ public class View extends JFrame {
     private List<JButton> tileButtons;
     private JButton selectedTileButton;
 
+    /**
+     * Constructor for the View class.
+     * Initializes the JFrame and its components.
+     */
     public View() {
         this.tileButtons = new ArrayList<>();
 
@@ -46,10 +55,10 @@ public class View extends JFrame {
         });
         JButton skipTurnButton = new JButton("Skip Turn");
         skipTurnButton.addActionListener(e -> {
-                    if (actionListener != null) {
-                        actionListener.onSkipTurnClicked();
-                    }
-                });
+            if (actionListener != null) {
+                actionListener.onSkipTurnClicked();
+            }
+        });
         add(submitButton, BorderLayout.EAST);
         add(skipTurnButton, BorderLayout.WEST);
 
@@ -57,12 +66,20 @@ public class View extends JFrame {
         setVisible(true);
     }
 
-    // Set the action listener
+    /**
+     * Sets the UserActionListener for the View.
+     *
+     * @param listener the UserActionListener to set
+     */
     public void setUserActionListener(UserActionListener listener) {
         this.actionListener = listener;
     }
 
-    // Initialize the board
+    /**
+     * Initializes the game board with the given size.
+     *
+     * @param boardSize the size of the game board
+     */
     public void initializeBoard(int boardSize) {
         boardPanel.removeAll();
         boardPanel.setLayout(new GridLayout(boardSize, boardSize));
@@ -107,7 +124,12 @@ public class View extends JFrame {
         boardPanel.repaint();
     }
 
-    // Update the board
+
+    /**
+     * Updates the game board with the given board state.
+     *
+     * @param board the board state to update
+     */
     public void updateBoard(char[][] board) {
         Component[] components = boardPanel.getComponents();
         int boardSize = (int) Math.sqrt(components.length);
@@ -134,7 +156,11 @@ public class View extends JFrame {
         boardPanel.repaint();
     }
 
-    // Initialize the tile rack
+    /**
+     * Initializes the tile rack with the given tiles.
+     *
+     * @param tiles the tiles to initialize the tile rack with
+     */
     public void initializeTileRack(List<Character> tiles) {
         tileRackPanel.removeAll();
         tileButtons.clear();
@@ -165,12 +191,20 @@ public class View extends JFrame {
         tileRackPanel.repaint();
     }
 
-    // Update the tile rack
+    /**
+     * Updates the tile rack with the given tiles.
+     *
+     * @param tiles the tiles to update the tile rack with
+     */
     public void updateTileRack(List<Character> tiles) {
         initializeTileRack(tiles);
     }
 
-    // Update the status label
+    /**
+     * Updates the status label with the given status message.
+     *
+     * @param status the status message to update
+     */
     public void updateStatus(String status) {
         statusLabel.setText(status);
     }
@@ -184,7 +218,9 @@ public class View extends JFrame {
         JOptionPane.showMessageDialog(this, message);
     }
 
-    // Deselect the tile
+    /**
+     * Deselects the currently selected tile.
+     */
     public void deselectTile() {
         if (selectedTileButton != null) {
             selectedTileButton.setBackground(null);
@@ -192,7 +228,11 @@ public class View extends JFrame {
         }
     }
 
-    // Disable a tile button
+    /**
+     * Disables the tile button with the given tile.
+     *
+     * @param tile the tile to disable
+     */
     public void disableTileButton(char tile) {
         for (JButton btn : tileButtons) {
             if (btn.getText().equals(String.valueOf(tile))) {

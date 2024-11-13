@@ -1,5 +1,8 @@
 package model;
 
+/**
+ * Represents a position in the maze.
+ */
 public class Position {
     public final int row;
     public final int col;
@@ -9,7 +12,11 @@ public class Position {
         this.col = col;
     }
 
-    // Override equals and hashCode for proper functioning in collections
+    /**
+     * Returns a string representation of the object.
+     *
+     * @return a string representation of the object.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -21,6 +28,11 @@ public class Position {
         return col == position.col;
     }
 
+    /**
+     * Returns a hash code value for the object.
+     *
+     * @return a hash code value for the object.
+     */
     @Override
     public int hashCode() {
         int result = row;

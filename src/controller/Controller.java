@@ -15,6 +15,12 @@ public class Controller implements UserActionListener, ModelObserver {
     private View view;
     private Character selectedTile;
 
+    /**
+     * Constructor for the Controller class
+     *
+     * @param model
+     * @param view
+     */
     public Controller(Model model, View view) {
         this.model = model;
         this.view = view;
@@ -32,12 +38,22 @@ public class Controller implements UserActionListener, ModelObserver {
 
     }
 
-    // UserActionListener methods
+    /**
+     * This method is called when a tile is selected from the tile rack.
+     *
+     * @param tile
+     */
     @Override
     public void onTileSelected(char tile) {
         selectedTile = tile;
     }
 
+    /**
+     * This method is called when a tile is placed on the board.
+     *
+     * @param row
+     * @param col
+     */
     @Override
     public void onBoardCellClicked(int row, int col) {
         if (selectedTile != null) {
@@ -62,18 +78,26 @@ public class Controller implements UserActionListener, ModelObserver {
             view.showMessage("Please select a tile first.");
         }
     }
+
+    /**
+     * This method is called when the user clicks the "Skip Turn" button.
+     */
     public void onSkipTurnClicked() {
         model.restorePlayerTiles();
         model.nextTurn(); // Skip to the next player’s turn
     }
 
-
+    /**
+     * This method is called when the user clicks the "Submit" button.
+     */
     @Override
     public void onSubmitButtonClicked() {
         submitTurn();
     }
 
-
+    /**
+     * This method is called when the user clicks the "Shuffle" button.
+     */
     public void submitTurn() {
         boolean success = model.submitWord();
 
@@ -95,7 +119,9 @@ public class Controller implements UserActionListener, ModelObserver {
     }
 
 
-    // End the game
+    /**
+     * This method is called when the game is over.
+     */
     private void endGame() {
         List<Player> players = model.getPlayers();
         StringBuilder finalScores = new StringBuilder("Game Over! Final Scores:\n");
@@ -109,12 +135,16 @@ public class Controller implements UserActionListener, ModelObserver {
     }
 
 
-    // Start the game
+    /**
+     * This method is called when the game is started.
+     */
     public void startGame() {
         onModelChanged();
     }
 
-    // ModelObserver method
+    /**
+     * This method is called when the model is changed.
+     */
     @Override
     public void onModelChanged() {
         view.updateBoard(model.getBoardState());
