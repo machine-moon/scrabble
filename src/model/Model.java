@@ -10,6 +10,8 @@ import java.util.*;
  * Represents the game model.
  */
 public class Model {
+    private static Model instance;
+
     private char[][] board;
     private List<Player> players;
     private int currentPlayerIndex;
@@ -26,7 +28,7 @@ public class Model {
      *
      * @param boardSize the size of the board (e.g., 15 for a 15x15 board)
      */
-    public Model(int boardSize) {
+    private Model(int boardSize) {
         this.boardSize = boardSize;
         this.board = new char[boardSize][boardSize];
         this.players = new ArrayList<>();
@@ -36,6 +38,26 @@ public class Model {
         this.wordlist = loadWordList("src/model/words_alpha.txt");
         this.currentTurnPlacements = new HashMap<>();
         this.isFirstTurn = true;
+    }
+
+    /**
+     * Gets the singleton instance of the model.
+     *
+     * @param boardSize the size of the board
+     * @return the singleton instance of the model
+     */
+    public static Model getInstance(int boardSize) {
+        if (instance == null) {
+            instance = new Model(boardSize);
+        }
+        return instance;
+    }
+
+    /**
+     * Resets the singleton instance of the model.
+     */
+    public static void resetInstance() {
+        instance = null;
     }
 
     /**
