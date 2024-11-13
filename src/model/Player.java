@@ -10,7 +10,7 @@ public class Player {
 
     private String name;
     private int score;
-    public List<String> playerTiles;
+    public List<String> tiles;
 
     /**
      * Constructs a Player with the specified name.
@@ -20,7 +20,7 @@ public class Player {
     public Player(String name) {
         this.name = name;
         this.score = 0;
-        this.playerTiles = new ArrayList<>();
+        this.tiles = new ArrayList<>();
     }
 
     /**
@@ -50,20 +50,39 @@ public class Player {
         this.score += points;
     }
 
-    public boolean addTiles(List<String> tileList) {
-        int tilesCount = 0;
-        if (playerTiles.size() < 7){
-            tilesCount = playerTiles.size();
-            for (String c: tileList) {
-                if (playerTiles.size() < 7) {
-                    playerTiles.add(c);
-                    tilesCount++;
-                }
+
+    // Deduct points from the player's score (used when reverting placements)
+    public void deductScore(int points) {
+        this.score -= points;
+    }
+
+    // Get the player's current tiles
+    public List<Character> getTiles() {
+        return tiles;
+    }
+
+    // Check if the player has a specific tile
+    public boolean hasTile(char tile) {
+        return tiles.contains(tile);
+    }
+
+    // Add a tile to the player's rack
+    public void addTile(char tile) {
+        tiles.add(tile);
+    }
+
+    // Remove a tile from the player's rack
+    public boolean removeTile(char tile) {
+        return tiles.remove(Character.valueOf(tile));
+    }
+
+    // Replenish the player's tiles to a maximum of 7 from the TileBag
+    public void replenishTiles(TileBag tileBag) {
+        while (tiles.size() < 7 && !tileBag.isEmpty()) {
+            Character tile = tileBag.drawTile();
+            if (tile != null) {
+                tiles.add(tile);
             }
-            return true;
-        }
-        else{
-            return false;
         }
     }
 }

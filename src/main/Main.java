@@ -8,23 +8,25 @@ import view.View;
 public class Main {
 
     public static void main(String[] args) {
-        // Determine the path to the word list file
-        String wordListPath = args.length > 0 ? args[0] : "wordlist.txt";
-
         // Initialize the model with a standard Scrabble board size (15x15) and the word list path
-        Model model = new Model(15, wordListPath);
-
-        // Initialize the view with a reference to the model
-        View view = new View(model);
-
-        // Initialize the controller with a reference to the model
-        Controller controller = new Controller(model);
+        Model model = new Model(15);
 
         // Add players to the model
         model.addPlayer(new Player("tarek"));
         model.addPlayer(new Player("mithushan"));
 
-        // Start the game loop
+        // Initialize the view with a reference to the model
+        View view = new View();
+
+        // Initialize the controller with a reference to the model
+        Controller controller = new Controller(model, view);
+
+        // Initialize the board and tile rack in the view
+        view.initializeBoard(model.getBoardSize());
+        view.initializeTileRack(model.getCurrentPlayer().getTiles());
+        view.updateStatus("Current player: " + model.getCurrentPlayer().getName() + " | Score: " + model.getCurrentPlayer().getScore());
+
+        // Start the game
         controller.startGame();
     }
 }
