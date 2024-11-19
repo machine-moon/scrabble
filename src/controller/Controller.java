@@ -139,14 +139,14 @@ public class Controller implements UserActionListener, ModelObserver {
      * This method is called when the game is started.
      */
     public void startGame() {
-        onModelChanged();
+        onModelChanged("Game started", model);
     }
 
     /**
      * This method is called when the model is changed.
      */
     @Override
-    public void onModelChanged() {
+    public void onModelChanged(String description, Model eventSource) {
         view.updateBoard(model.getBoardState());
         view.updateTileRack(model.getCurrentPlayer().getTiles());
         String status = "Current player: " + model.getCurrentPlayer().getName() +

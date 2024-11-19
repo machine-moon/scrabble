@@ -94,7 +94,7 @@ public class Player {
      * @param tile
      */
     public void removeTile(char tile) {
-        tiles.remove(tile);
+        tiles.remove(Character.valueOf(tile));
     }
 
     /**

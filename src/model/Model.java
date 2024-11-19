@@ -107,7 +107,7 @@ public class Model {
         }
         board[row][col] = tile;
         currentTurnPlacements.put(new Position(row, col), tile);
-        notifyObservers();
+        notifyObservers("Tile placed at " + row + "," + col);
         return true;
     }
 
@@ -127,6 +127,7 @@ public class Model {
      */
     public boolean submitWord() {
         List<String> newWords = getAllNewWords();
+        System.out.println(newWords);
         if (newWords.isEmpty()) {
             return false; // No tiles placed
         }
@@ -140,7 +141,9 @@ public class Model {
 
         // All words are valid, calculate total score
         int totalScore = calculateTotalScore(newWords);
+        System.out.println(totalScore);
         getCurrentPlayer().addScore(totalScore);
+        System.out.println(getCurrentPlayer().getScore());
 
         // After validation, replenish player's tiles
         getCurrentPlayer().replenishTiles(tileBag);
@@ -153,14 +156,14 @@ public class Model {
             if (!coversCenter()) {
                 // Invalid first move; revert placements
                 revertPlacements();
-                getCurrentPlayer().deductScore(totalScore); // Assuming method exists
-                notifyObservers();
+                getCurrentPlayer().deductScore(totalScore);
+                notifyObservers("Tile must Cover Centre");
                 return false;
             }
             isFirstTurn = false; // First turn completed
         }
 
-        notifyObservers();
+        notifyObservers("Word Submitted");
         return true;
     }
 
@@ -171,7 +174,7 @@ public class Model {
      */
     private List<String> getAllNewWords() {
         List<String> newWords = new ArrayList<>();
-        Set<String> uniqueWords = new HashSet<>(); // To avoid duplicate words
+        Set<String> uniqueWords = new HashSet<>();
 
         for (Position pos : currentTurnPlacements.keySet()) {
             // Check horizontal word
@@ -381,7 +384,7 @@ public class Model {
      */
     public void nextTurn() {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        notifyObservers();
+        notifyObservers("Next player's turn");
     }
 
     /**
@@ -415,9 +418,9 @@ public class Model {
     /**
      * Notifies all observers that the model has changed.
      */
-    private void notifyObservers() {
+    private void notifyObservers(String description) {
         for (ModelObserver observer : observers) {
-            observer.onModelChanged();
+            observer.onModelChanged(description, this);
         }
     }
 
@@ -432,7 +435,7 @@ public class Model {
             board[pos.row][pos.col] = '\0'; // Remove the tile from the board
         }
         clearPlacements();
-        notifyObservers();
+        notifyObservers("Tiles Restored");
     }
 
     /**
