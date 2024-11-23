@@ -19,7 +19,9 @@ public class View extends JFrame implements ModelObserver {
     private JPanel boardPanel;
     private JPanel tileRackPanel;
     private JLabel statusLabel;
-    private List<JButton> tileButtons;
+    private List<JButton> playerTiles;
+
+
     private JButton selectedTileButton; //del this?
     private JButton submitButton;
     private JButton skipTurnButton;
@@ -53,7 +55,7 @@ public class View extends JFrame implements ModelObserver {
         // Initialize board
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
-                JButton cellButton = getCellButton(row, col);
+                JButton cellButton = initializeEachBoardCell(row, col);
                 boardPanel.add(cellButton);
             }
         }
@@ -71,16 +73,23 @@ public class View extends JFrame implements ModelObserver {
         add(statusLabel, BorderLayout.NORTH);
 
         // Tile buttons
-        tileButtons = new ArrayList<>();
+        playerTiles = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            JButton tileButton = new JButton();
+            tileButton.setFont(new Font("Arial", Font.PLAIN, 20));
+            tileButton.setFocusable(false);
+            tileRackPanel.add(tileButton);
+            playerTiles.add(tileButton);
+        }
 
         // Selected tile button
         selectedTileButton = null;
 
         // Submit button
-        JButton submitButton = new JButton("Submit");
+        submitButton = new JButton("Submit");
 
         // Skip turn button
-        JButton skipTurnButton = new JButton("Skip Turn");
+        skipTurnButton = new JButton("Skip Turn");
 
         add(submitButton, BorderLayout.EAST);
         add(skipTurnButton, BorderLayout.WEST);
@@ -89,30 +98,24 @@ public class View extends JFrame implements ModelObserver {
         setVisible(false);
     }
 
-    private JButton getCellButton(int row, int col) {
+    private JButton initializeEachBoardCell(int row, int col) {
         JButton cellButton = new JButton();
         cellButton.setFont(new Font("Arial", Font.PLAIN, 20));
         cellButton.setFocusable(false);
 
-        final int currentRow = row;
-        final int currentCol = col;
-
         // Highlight the center tile
-        if (row == center && col == center) {
-            cellButton.setBackground(Color.orange);
-            cellButton.setOpaque(true);
-        } else {
-            cellButton.setBackground(Color.LIGHT_GRAY);
-        }
+        cellButton.setBackground((row == center && col == center) ? Color.orange : Color.LIGHT_GRAY);
+        cellButton.setOpaque(row == center && col == center);
 
-        cellButton.addActionListener(e -> {
-            if (selectedTileButton != null && actionListener != null) {
-                actionListener.onBoardCellClicked(currentRow, currentCol);
-            } else {
-                showMessage("Please select a tile to place.");
-            }
-        });
         return cellButton;
+    }
+
+    public List<JButton> getPlayerTiles() {
+        return playerTiles;
+    }
+
+    public JButton getBoardCellButton(int row, int col) {
+        return (JButton) boardPanel.getComponent(row * boardSize + col);
     }
 
     public JButton getSubmitButton() {
@@ -123,91 +126,56 @@ public class View extends JFrame implements ModelObserver {
         return skipTurnButton;
     }
 
-
-    // add method for returning refrence to boardPanel and tileRackPanel (rename this to playerRackPanel)
-
-
-
     /**
      * Updates the game board with the given board state.
      *
      * @param board the board state to update
      */
     public void updateBoard(char[][] board) {
-        Component[] components = boardPanel.getComponents();
+        for (int row = 0; row < boardSize; row++) {
+            for (int col = 0; col < boardSize; col++) {
+                JButton cell = getBoardCellButton(row, col);
+                char c = board[row][col];
+                cell.setText(c == '\0' ? "" : String.valueOf(c));
+                // Reapply center tile styling to maintain its special appearance
 
-        // get from field
-        // int boardSize = (int) Math.sqrt(components.length);
-        // int center = boardSize / 2;
+                cell.setBackground((row == center && col == center) ? Color.orange : Color.LIGHT_GRAY);
+                // also reapply premium tiles styling
 
-        for (int i = 0; i < components.length; i++) {
-            JButton cell = (JButton) components[i];
-            int row = i / boardSize;
-            int col = i % boardSize;
-            char c = board[row][col];
-            cell.setText(c == '\0' ? "" : String.valueOf(c));
-
-            // Reapply center tile styling to maintain its special appearance
-            cell.setBackground((row == center && col == center) ? Color.orange : Color.LIGHT_GRAY);
-
+            }
         }
-
         boardPanel.revalidate();
         boardPanel.repaint();
     }
 
-    /**
-     * Initializes the tile rack with the given tiles.
-     *
-     * @param tiles the tiles to initialize the tile rack with
-     */
-    public void initializeTileRack(List<Character> tiles) {
-        tileRackPanel.removeAll();
-        tileButtons.clear();
-        selectedTileButton = null;
-
-        for (Character tile : tiles) {
-            JButton tileButton = new JButton(tile.toString());
-            tileButton.setFont(new Font("Arial", Font.PLAIN, 20));
-
-            // ---- Refactor to move this to a method (whats the point of this?)
-            tileButton.addActionListener(e -> {
-                if (selectedTileButton != null) {
-                    selectedTileButton.setBackground(null);
-                }
-
-                selectedTileButton = tileButton;
-                tileButton.setBackground(Color.CYAN);
-
-                if (actionListener != null) {
-                    actionListener.onTileSelected(tile);
-                }
-            });
-            // ----
-
-            tileRackPanel.add(tileButton);
-            tileButtons.add(tileButton);
-        }
-
-        tileRackPanel.revalidate();
-        tileRackPanel.repaint();
-    }
 
     /**
      * Updates the tile rack with the given tiles.
      *
-     * @param tiles the tiles to update the tile rack with
+     * @param tiles the tiles to update
      */
-    public void updateTileRack(List<Character> tiles) {
-        initializeTileRack(tiles);
+    public void loadPlayerTiles(List<Character> tiles) {
+        for (int i = 0; i < tiles.size(); i++) {
+            if (tiles.get(i) != '\0') {
+                playerTiles.get(i).setText(tiles.get(i).toString());
+                playerTiles.get(i).setVisible(true);
+            } else {
+                playerTiles.get(i).setText("\0"); // don't know if this is the right move, but well preserve.
+                playerTiles.get(i).setVisible(false);
+            }
+        }
+        tileRackPanel.revalidate();
+        tileRackPanel.repaint();
     }
 
+
     /**
-     * Updates the status label with the given status message.
+     * Updates the status label with the given player.
      *
-     * @param status the status message to update
+     * @param p the player to update
      */
-    public void updateStatus(String status) {
+    public void updateStatus(Player p) {
+        String status = "Current player: " + p.getName() + " | Score: " + p.getScore();
         statusLabel.setText(status);
     }
 
@@ -230,19 +198,6 @@ public class View extends JFrame implements ModelObserver {
         }
     }
 
-    /**
-     * Disables the tile button with the given tile.
-     *
-     * @param tile the tile to disable
-     */
-    public void disableTileButton(char tile) {
-        for (JButton btn : tileButtons) {
-            if (btn.getText().equals(String.valueOf(tile))) {
-                btn.setEnabled(false);
-                break;
-            }
-        }
-    }
 
     @Override
     public void update(String message, Model m) {
@@ -258,8 +213,8 @@ public class View extends JFrame implements ModelObserver {
 
                 // -----I REFACTOR TO MOVE IT HERE JUST FINE.
                 //initializeBoard();  //refactored, get board size from view and do ALL initialization in constructor
-                initializeTileRack(m.getCurrentPlayer().getTiles());
-                updateStatus("Current player: " + m.getCurrentPlayer().getName() + " | Score: " + m.getCurrentPlayer().getScore());
+                loadPlayerTiles(m.getCurrentPlayer().getTiles());
+                updateStatus(m.getCurrentPlayer());
                 // -----
                 setVisible(true);
                 break;
@@ -267,11 +222,10 @@ public class View extends JFrame implements ModelObserver {
                 updateBoard(m.getBoardState());
                 break;
             case "updatePlayerTiles":
-                updateTileRack(m.getCurrentPlayer().getTiles());
+                loadPlayerTiles(m.getCurrentPlayer().getTiles());
                 break;
-            case "status":
-                String status = "Current player: " + m.getCurrentPlayer().getName() + " | Score: " + m.getCurrentPlayer().getScore();
-                updateStatus(status);
+            case "nextTurn":
+                updateStatus(m.getCurrentPlayer());
                 break;
             case "gameOver":
                 showMessage("Game Over!");

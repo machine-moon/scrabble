@@ -2,9 +2,9 @@ package controller;
 
 import model.Model;
 import model.Player;
-import model.ModelObserver;
 import view.View;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
@@ -14,12 +14,14 @@ import java.util.List;
 public class Controller {
     private Model model;
     private View view;
-    private Character selectedTile;
+    private Character selectedPlayerChar;
+    private JButton selectedPlayerTileBtn;
 
     public Controller(Model m, View v) {
         model = m;
         view = v;
-        selectedTile = null;
+        selectedPlayerChar = null;
+        selectedPlayerTileBtn = null;
 
 
         // Add action listeners to view components
@@ -27,64 +29,63 @@ public class Controller {
         view.getSkipTurnButton().addActionListener(e -> onSkipTurnClicked());
 
 
-        // do a loop for every button in the board to add action listener
-        // Component[] components = boardPanel.getComponents();
-        // boardPanel is a 2D array of JButton, inside is a cell button.
-        // if selectedTile is not null, then call onBoardCellClicked
-        // else, show message "Please select a tile first."
-
-        // check initializeTileRack() in view
-        // for every button in tileRackPanel, add action listener
-        /*
-        private void handleTileButtonClick(JButton tileButton, Character tile) {
-            if (selectedTileButton != null) {
-                selectedTileButton.setBackground(null);
-            }
-
-            selectedTileButton = tileButton;
-            tileButton.setBackground(Color.CYAN);
-
-            if (actionListener != null) {
-                actionListener.onTileSelected(tile);
+        // Loop through each cell button in the board and add action listener to each board cell button
+        for (int row = 0; row < model.getBoardSize(); row++) {
+            for (int col = 0; col < model.getBoardSize(); col++) {
+                JButton cellButton = view.getBoardCellButton(row, col);
+                final int currentRow = row;
+                final int currentCol = col;
+                cellButton.addActionListener(e -> onBoardCellClicked(currentRow, currentCol, (JButton) e.getSource()));
             }
         }
-         */
+
+        // Add action listeners to player tile rack buttons
+        for (JButton tileButton : view.getPlayerTiles()) {
+            tileButton.addActionListener(e -> onPlayerTileSelected(tileButton));
+        }
+
 
     }
 
     /**
      * This method is called when a tile is selected from the tile rack.
      *
-     * @param tile
+     * @param tileButton the button representing the selected tile
      */
-    public void onTileSelected(char tile) {
-        selectedTile = tile;
+    public void onPlayerTileSelected(JButton tileButton) {
+        if (selectedPlayerTileBtn != null) {
+            selectedPlayerTileBtn.setBackground(null); // Deselect previous tile
+        }
+
+        selectedPlayerChar = tileButton.getText().charAt(0);
+        selectedPlayerTileBtn = tileButton;
+        // Highlight selected tile
+        tileButton.setBackground(Color.CYAN);
     }
 
     /**
      * This method is called when a tile is placed on the board.
      *
-     * @param row
-     * @param col
+     * @param row the row of the board cell
+     * @param col the column of the board cell
      */
-    public void onBoardCellClicked(int row, int col) {
-        if (selectedTile != null) {
-            Player currentPlayer = model.getCurrentPlayer();
-            if (currentPlayer.hasTile(selectedTile)) {
-                boolean success = model.placeTile(selectedTile, row, col);
-                if (success) {
-                    // Remove the tile from the player's rack
-                    currentPlayer.removeTile(selectedTile);
-                    // Update the view
-                    view.disableTileButton(selectedTile);
-                    view.deselectTile();
-                    selectedTile = null;
-                } else {
-                    view.showMessage("Invalid tile placement. Try again.");
-                }
+    public void onBoardCellClicked(int row, int col, JButton cellButton) {
+        if (selectedPlayerChar != null) {
+            if (model.placeTile(selectedPlayerChar, row, col)) {
+                // against doing this.
+                // Remove the tile from the player's rack
+                model.getCurrentPlayer().removeTile(selectedPlayerChar);
+                // --- Update the view through the model event "tile placed"
+                selectedPlayerTileBtn.setEnabled(false);
+                selectedPlayerTileBtn.setBackground(null);
+                cellButton.setText(selectedPlayerChar.toString());
+                cellButton.setEnabled(false);
+                cellButton.setBackground(null);
+                // ---
+                selectedPlayerChar = null;
+                selectedPlayerTileBtn = null;
             } else {
-                view.showMessage("You don't have that tile.");
-                selectedTile = null;
+                view.showMessage("Invalid tile placement. Try again.");
             }
         } else {
             view.showMessage("Please select a tile first.");
@@ -103,9 +104,8 @@ public class Controller {
      * This method is called when the user clicks the "Submit" button.
      */
     public void onSubmitButtonClicked() {
-        boolean success = model.submitWord();
 
-        if (success) {
+        if (model.submitWord()) {
             if (model.isFirstTurn() && !model.isCenterCovered()) {
                 view.showMessage("First word must be placed covering the center square.");
                 model.restorePlayerTiles();
@@ -132,8 +132,6 @@ public class Controller {
         }
         view.showMessage(finalScores.toString());
     }
-
-
 
 
 }

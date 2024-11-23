@@ -95,19 +95,25 @@ public class Model {
      * @return the current player
      */
     public boolean placeTile(char tile, int row, int col) {
+
+        // check if the player has the tile
+        if (!(getCurrentPlayer().hasTile(tile))) {
+            return false;
+        }
+
+        // check if the position is valid
         if (!isValidPosition(row, col)) {
-            return false; // Invalid position
+            return false;
         }
+
+        // check if the position is empty
         if (board[row][col] != '\0') {
-            return false; // Cell already occupied
+            return false;
         }
-        Player currentPlayer = getCurrentPlayer();
-        if (!currentPlayer.hasTile(tile)) {
-            return false; // Player doesn't have this tile
-        }
+
         board[row][col] = tile;
         currentTurnPlacements.put(new Position(row, col), tile);
-        notifyObservers("Tile placed at " + row + "," + col);
+        notifyObservers("Tile placed");
         return true;
     }
 
