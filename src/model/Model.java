@@ -418,9 +418,9 @@ public class Model {
     /**
      * Notifies all observers that the model has changed.
      */
-    private void notifyObservers(String description) {
+    private void notifyObservers(String eventType) {
         for (ModelObserver observer : observers) {
-            observer.onModelChanged(description, this);
+            observer.update(eventType, this);
         }
     }
 

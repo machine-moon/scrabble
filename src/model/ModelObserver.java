@@ -5,5 +5,5 @@ package model;
  * View class to allow the Model to notify the View when the model has changed.
  */
 public interface ModelObserver {
-    void onModelChanged(String description, Model eventSource);
+    void update(String message, Model m);
 }

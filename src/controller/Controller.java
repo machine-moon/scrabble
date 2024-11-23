@@ -5,36 +5,50 @@ import model.Player;
 import model.ModelObserver;
 import view.View;
 
+import java.awt.*;
 import java.util.List;
 
 /**
  * The Controller class handles the game logic and user interactions.
  */
-public class Controller implements UserActionListener, ModelObserver {
+public class Controller {
     private Model model;
     private View view;
     private Character selectedTile;
 
-    /**
-     * Constructor for the Controller class
-     *
-     * @param model
-     * @param view
-     */
-    public Controller(Model model, View view) {
-        this.model = model;
-        this.view = view;
-        this.selectedTile = null;
+    public Controller(Model m, View v) {
+        model = m;
+        view = v;
+        selectedTile = null;
 
-        // Set the action listener in the view
-        view.setUserActionListener(this);
 
-        // Register as an observer of the model
-        this.model.addObserver(this);
+        // Add action listeners to view components
+        view.getSubmitButton().addActionListener(e -> onSubmitButtonClicked());
+        view.getSkipTurnButton().addActionListener(e -> onSkipTurnClicked());
 
-        view.initializeBoard(model.getBoardSize());
-        view.initializeTileRack(model.getCurrentPlayer().getTiles());
-        view.updateStatus("Current player: " + model.getCurrentPlayer().getName() + " | Score: " + model.getCurrentPlayer().getScore());
+
+        // do a loop for every button in the board to add action listener
+        // Component[] components = boardPanel.getComponents();
+        // boardPanel is a 2D array of JButton, inside is a cell button.
+        // if selectedTile is not null, then call onBoardCellClicked
+        // else, show message "Please select a tile first."
+
+        // check initializeTileRack() in view
+        // for every button in tileRackPanel, add action listener
+        /*
+        private void handleTileButtonClick(JButton tileButton, Character tile) {
+            if (selectedTileButton != null) {
+                selectedTileButton.setBackground(null);
+            }
+
+            selectedTileButton = tileButton;
+            tileButton.setBackground(Color.CYAN);
+
+            if (actionListener != null) {
+                actionListener.onTileSelected(tile);
+            }
+        }
+         */
 
     }
 
@@ -43,7 +57,6 @@ public class Controller implements UserActionListener, ModelObserver {
      *
      * @param tile
      */
-    @Override
     public void onTileSelected(char tile) {
         selectedTile = tile;
     }
@@ -54,7 +67,6 @@ public class Controller implements UserActionListener, ModelObserver {
      * @param row
      * @param col
      */
-    @Override
     public void onBoardCellClicked(int row, int col) {
         if (selectedTile != null) {
             Player currentPlayer = model.getCurrentPlayer();
@@ -84,21 +96,13 @@ public class Controller implements UserActionListener, ModelObserver {
      */
     public void onSkipTurnClicked() {
         model.restorePlayerTiles();
-        model.nextTurn(); // Skip to the next player’s turn
+        model.nextTurn();
     }
 
     /**
      * This method is called when the user clicks the "Submit" button.
      */
-    @Override
     public void onSubmitButtonClicked() {
-        submitTurn();
-    }
-
-    /**
-     * This method is called when the user clicks the "Shuffle" button.
-     */
-    public void submitTurn() {
         boolean success = model.submitWord();
 
         if (success) {
@@ -119,38 +123,17 @@ public class Controller implements UserActionListener, ModelObserver {
     }
 
 
-    /**
-     * This method is called when the game is over.
-     */
+    // should be a model method, maybe add a while(1) if model = null, trigger
     private void endGame() {
         List<Player> players = model.getPlayers();
         StringBuilder finalScores = new StringBuilder("Game Over! Final Scores:\n");
         for (Player player : players) {
-            finalScores.append(player.getName())
-                    .append(": ")
-                    .append(player.getScore())
-                    .append("\n");
+            finalScores.append(player.getName()).append(": ").append(player.getScore()).append("\n");
         }
         view.showMessage(finalScores.toString());
     }
 
 
-    /**
-     * This method is called when the game is started.
-     */
-    public void startGame() {
-        onModelChanged("Game started", model);
-    }
 
-    /**
-     * This method is called when the model is changed.
-     */
-    @Override
-    public void onModelChanged(String description, Model eventSource) {
-        view.updateBoard(model.getBoardState());
-        view.updateTileRack(model.getCurrentPlayer().getTiles());
-        String status = "Current player: " + model.getCurrentPlayer().getName() +
-                " | Score: " + model.getCurrentPlayer().getScore();
-        view.updateStatus(status);
-    }
+
 }
