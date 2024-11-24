@@ -211,6 +211,9 @@ public class View extends JFrame implements ModelObserver {
             case "wordSubmitted":
                 handleWordSubmitted(m);
                 break;
+            case "noAdjacentTiles":
+                handleAdjacentWord(m);
+                break;
             case "tilePlaced":
                 handleBoardUpdate(m);
                 break;
@@ -259,6 +262,12 @@ public class View extends JFrame implements ModelObserver {
 
     private void handleNoWordFound(Model m) {
         showMessage("No new word found! Please try again.");
+        updateBoard(m.getBoardState());
+
+    }
+
+    private void handleAdjacentWord(Model m) {
+        showMessage("Word not adjacent! Please try again.");
         updateBoard(m.getBoardState());
 
     }
