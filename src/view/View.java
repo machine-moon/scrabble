@@ -188,44 +188,28 @@ public class View extends JFrame implements ModelObserver {
         JOptionPane.showMessageDialog(this, message);
     }
 
-    /**
-     * Deselects the currently selected tile.
-     */
-    public void deselectTile() {
-        if (selectedTileButton != null) {
-            selectedTileButton.setBackground(null);
-            selectedTileButton = null;
-        }
-    }
-
-
     @Override
     public void update(String message, Model m) {
         // handle different types of updates
         switch (message) {
             case "initialize":
-                // note sure to make this its own event like updateVars or maybe put it outside... or just stream from model like below.
-                // load the variables from the model
                 this.boardSize = m.getBoardSize();
                 this.center = boardSize / 2;
                 this.currentPlayer = m.getCurrentPlayer();
-
-
-                // -----I REFACTOR TO MOVE IT HERE JUST FINE.
-                //initializeBoard();  //refactored, get board size from view and do ALL initialization in constructor
                 loadPlayerTiles(m.getCurrentPlayer().getTiles());
                 updateStatus(m.getCurrentPlayer());
-                // -----
                 setVisible(true);
                 break;
-            case "board":
+            case "tilePlaced":
                 updateBoard(m.getBoardState());
                 break;
-            case "updatePlayerTiles":
+            case "updatePlayerTiles", "resetTiles":
                 loadPlayerTiles(m.getCurrentPlayer().getTiles());
+                updateBoard(m.getBoardState());
                 break;
             case "nextTurn":
                 updateStatus(m.getCurrentPlayer());
+                loadPlayerTiles(m.getCurrentPlayer().getTiles());
                 break;
             case "gameOver":
                 showMessage("Game Over!");
