@@ -154,13 +154,13 @@ public class View extends JFrame implements ModelObserver {
      *
      * @param tiles the tiles to update
      */
-    public void loadPlayerTiles(List<Character> tiles) {
-        for (int i = 0; i < tiles.size(); i++) {
-            if (tiles.get(i) != '\0') {
+    private void loadPlayerTiles(List<Character> tiles) {
+        for (int i = 0; i < playerTiles.size(); i++) {
+            if (i < tiles.size() && tiles.get(i) != '\0') {
                 playerTiles.get(i).setText(tiles.get(i).toString());
                 playerTiles.get(i).setVisible(true);
             } else {
-                playerTiles.get(i).setText("\0"); // don't know if this is the right move, but well preserve.
+                playerTiles.get(i).setText("");
                 playerTiles.get(i).setVisible(false);
             }
         }
@@ -188,45 +188,97 @@ public class View extends JFrame implements ModelObserver {
         JOptionPane.showMessageDialog(this, message);
     }
 
+
     @Override
     public void update(String message, Model m) {
-        // handle different types of updates
+        // note: keep all the handle methods are under the update method.
         switch (message) {
             case "initialize":
-                this.boardSize = m.getBoardSize();
-                this.center = boardSize / 2;
-                this.currentPlayer = m.getCurrentPlayer();
-                loadPlayerTiles(m.getCurrentPlayer().getTiles());
-                updateStatus(m.getCurrentPlayer());
-                setVisible(true);
+                handleInitialize(m);
+                break;
+            case "board":
+                handleBoardUpdate(m);
+                break;
+            case "centerNotCovered":
+                handleCenterNotCovered(m);
+                break;
+            case "invalidWord":
+                handleInvalidWord(m);
+                break;
+            case "noWordFound":
+                handleNoWordFound(m);
+                break;
+            case "wordSubmitted":
+                handleWordSubmitted(m);
                 break;
             case "tilePlaced":
-                updateBoard(m.getBoardState());
+                handleBoardUpdate(m);
                 break;
-            case "updatePlayerTiles", "resetTiles":
+            case "updatePlayerTiles":
+            case "resetTiles":
                 loadPlayerTiles(m.getCurrentPlayer().getTiles());
-                updateBoard(m.getBoardState());
                 break;
             case "nextTurn":
-                updateStatus(m.getCurrentPlayer());
-                loadPlayerTiles(m.getCurrentPlayer().getTiles());
+                handleNextTurn(m);
                 break;
             case "gameOver":
-                showMessage("Game Over!");
-                // tear down the view
-                // maybe add a button to restart the game?
-                // joptionpane to displayer winner
-                // ask the model who won, m.getWinner().getName()
-                // scoreboard?
-
-
-                setVisible(false);
+                handleGameOver();
                 break;
-
             default:
                 break;
         }
+    }
+
+
+    private void handleInitialize(Model m) {
+        this.boardSize = m.getBoardSize();
+        this.center = boardSize / 2;
+        this.currentPlayer = m.getCurrentPlayer();
+        loadPlayerTiles(m.getCurrentPlayer().getTiles());
+        updateStatus(m.getCurrentPlayer());
+        setVisible(true);
+    }
+
+    private void handleBoardUpdate(Model m) {
+        updateBoard(m.getBoardState());
+    }
+
+    private void handleCenterNotCovered(Model m) {
+        showMessage("First word must be placed covering the center square.");
+        updateBoard(m.getBoardState());
+        updateStatus(m.getCurrentPlayer());
+        loadPlayerTiles(m.getCurrentPlayer().getTiles());
+    }
+
+    private void handleInvalidWord(Model m) {
+        showMessage("Invalid word! Please try again.");
+        updateBoard(m.getBoardState());
+        updateStatus(m.getCurrentPlayer());
+        loadPlayerTiles(m.getCurrentPlayer().getTiles());
+    }
+
+    private void handleNoWordFound(Model m) {
+        showMessage("No new word found! Please try again.");
+        updateBoard(m.getBoardState());
 
     }
+
+    private void handleWordSubmitted(Model m) {
+        showMessage("Word accepted! Your score has been updated.");
+        updateBoard(m.getBoardState());
+        updateStatus(m.getCurrentPlayer());
+        loadPlayerTiles(m.getCurrentPlayer().getTiles());
+    }
+
+    private void handleNextTurn(Model m) {
+        updateStatus(m.getCurrentPlayer());
+        loadPlayerTiles(m.getCurrentPlayer().getTiles());
+    }
+
+    private void handleGameOver() {
+        showMessage("Game Over!");
+        setVisible(false);
+    }
+
 
 }

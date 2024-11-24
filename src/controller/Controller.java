@@ -63,11 +63,7 @@ public class Controller {
                 view.update("tilePlaced", model);
                 selectedPlayerChar = null;
                 selectedPlayerTileBtn = null;
-            } else {
-                view.showMessage("Invalid tile placement. Try again.");
             }
-        } else {
-            view.showMessage("Please select a tile first.");
         }
     }
 
@@ -80,19 +76,14 @@ public class Controller {
     public void onSubmitButtonClicked() {
         if (model.submitWord()) {
             if (model.isFirstTurn() && !model.isCenterCovered()) {
-                view.showMessage("First word must be placed covering the center square.");
                 model.restorePlayerTiles();
             } else {
-                view.showMessage("Word accepted! Your score has been updated.");
                 model.nextTurn(); // Move to the next player
                 reenablePlayerTiles();
                 if (model.isGameOver()) {
                     endGame();
                 }
             }
-        } else {
-            view.showMessage("Invalid word! Please try again.");
-            model.restorePlayerTiles();
         }
     }
 

@@ -12,14 +12,14 @@ import java.util.*;
 public class Model {
     private static Model instance;
 
-    private char[][] board;
-    private List<Player> players;
+    private final char[][] board;
+    private final List<Player> players;
     private int currentPlayerIndex;
-    private TileBag tileBag;
-    private List<ModelObserver> observers;
-    private Set<String> wordlist;
-    private int boardSize;
-    private Map<Position, Character> currentTurnPlacements;
+    private final TileBag tileBag;
+    private final List<ModelObserver> observers;
+    private final Set<String> wordlist;
+    private final int boardSize;
+    private final Map<Position, Character> currentTurnPlacements;
     private boolean isFirstTurn;
 
 
@@ -135,12 +135,17 @@ public class Model {
         List<String> newWords = getAllNewWords();
         System.out.println(newWords);
         if (newWords.isEmpty()) {
+            restorePlayerTiles();
+            notifyObservers("noWordFound");
+
             return false; // No tiles placed
         }
 
         // Validate all new words
         for (String word : newWords) {
             if (!validateWord(word)) {
+                restorePlayerTiles();
+                notifyObservers("invalidWord");
                 return false; // At least one word is invalid
             }
         }
@@ -163,13 +168,14 @@ public class Model {
                 // Invalid first move; revert placements
                 revertPlacements();
                 getCurrentPlayer().deductScore(totalScore);
-                notifyObservers("Tile must Cover Centre");
+                restorePlayerTiles();
+                notifyObservers("centerNotCovered");
                 return false;
             }
             isFirstTurn = false; // First turn completed
         }
 
-        notifyObservers("Word Submitted");
+        notifyObservers("wordSubmitted");
         return true;
     }
 
@@ -217,8 +223,7 @@ public class Model {
         // Move to the start of the word
         int currentRow = row;
         int currentCol = col;
-        while (isValidPosition(currentRow + deltaRow, currentCol + deltaCol) &&
-                board[currentRow + deltaRow][currentCol + deltaCol] != '\0') {
+        while (isValidPosition(currentRow + deltaRow, currentCol + deltaCol) && board[currentRow + deltaRow][currentCol + deltaCol] != '\0') {
             currentRow += deltaRow;
             currentCol += deltaCol;
         }
@@ -226,8 +231,7 @@ public class Model {
         // Move forward and build the word
         deltaRow = isHorizontal ? 0 : 1;
         deltaCol = isHorizontal ? 1 : 0;
-        while (isValidPosition(currentRow, currentCol) &&
-                board[currentRow][currentCol] != '\0') {
+        while (isValidPosition(currentRow, currentCol) && board[currentRow][currentCol] != '\0') {
             word.append(board[currentRow][currentCol]);
             currentRow += deltaRow;
             currentCol += deltaCol;
@@ -400,7 +404,11 @@ public class Model {
      */
     public boolean isGameOver() {
         // Example condition: when the tile bag is empty and a player has no tiles left
-        return tileBag.isEmpty() && players.stream().anyMatch(player -> player.getTiles().isEmpty());
+        boolean status = tileBag.isEmpty() && players.stream().anyMatch(player -> player.getTiles().isEmpty());
+        if (status) {
+            notifyObservers("gameOver");
+        }
+        return status;
     }
 
     /**
