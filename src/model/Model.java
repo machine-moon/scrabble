@@ -113,7 +113,7 @@ public class Model {
 
         board[row][col] = tile;
         currentTurnPlacements.put(new Position(row, col), tile);
-        notifyObservers("Tile placed");
+        notifyObservers("tilePlaced");
         return true;
     }
 
@@ -390,7 +390,7 @@ public class Model {
      */
     public void nextTurn() {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        notifyObservers("Next player's turn");
+        notifyObservers("nextTurn");
     }
 
     /**
@@ -441,7 +441,7 @@ public class Model {
             board[pos.row][pos.col] = '\0'; // Remove the tile from the board
         }
         clearPlacements();
-        notifyObservers("Tiles Restored");
+        notifyObservers("resetTiles");
     }
 
     /**

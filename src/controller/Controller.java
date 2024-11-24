@@ -23,11 +23,9 @@ public class Controller {
         selectedPlayerChar = null;
         selectedPlayerTileBtn = null;
 
-
         // Add action listeners to view components
         view.getSubmitButton().addActionListener(e -> onSubmitButtonClicked());
         view.getSkipTurnButton().addActionListener(e -> onSkipTurnClicked());
-
 
         // Loop through each cell button in the board and add action listener to each board cell button
         for (int row = 0; row < model.getBoardSize(); row++) {
@@ -43,15 +41,8 @@ public class Controller {
         for (JButton tileButton : view.getPlayerTiles()) {
             tileButton.addActionListener(e -> onPlayerTileSelected(tileButton));
         }
-
-
     }
 
-    /**
-     * This method is called when a tile is selected from the tile rack.
-     *
-     * @param tileButton the button representing the selected tile
-     */
     public void onPlayerTileSelected(JButton tileButton) {
         if (selectedPlayerTileBtn != null) {
             selectedPlayerTileBtn.setBackground(null); // Deselect previous tile
@@ -63,25 +54,13 @@ public class Controller {
         tileButton.setBackground(Color.CYAN);
     }
 
-    /**
-     * This method is called when a tile is placed on the board.
-     *
-     * @param row the row of the board cell
-     * @param col the column of the board cell
-     */
     public void onBoardCellClicked(int row, int col, JButton cellButton) {
         if (selectedPlayerChar != null) {
             if (model.placeTile(selectedPlayerChar, row, col)) {
-                // against doing this.
                 // Remove the tile from the player's rack
                 model.getCurrentPlayer().removeTile(selectedPlayerChar);
-                // --- Update the view through the model event "tile placed"
-                selectedPlayerTileBtn.setEnabled(false);
-                selectedPlayerTileBtn.setBackground(null);
-                cellButton.setText(selectedPlayerChar.toString());
-                cellButton.setEnabled(false);
-                cellButton.setBackground(null);
-                // ---
+                // Update the view through the model event "tilePlaced"
+                view.update("tilePlaced", model);
                 selectedPlayerChar = null;
                 selectedPlayerTileBtn = null;
             } else {
@@ -92,19 +71,13 @@ public class Controller {
         }
     }
 
-    /**
-     * This method is called when the user clicks the "Skip Turn" button.
-     */
     public void onSkipTurnClicked() {
         model.restorePlayerTiles();
         model.nextTurn();
+        reenablePlayerTiles();
     }
 
-    /**
-     * This method is called when the user clicks the "Submit" button.
-     */
     public void onSubmitButtonClicked() {
-
         if (model.submitWord()) {
             if (model.isFirstTurn() && !model.isCenterCovered()) {
                 view.showMessage("First word must be placed covering the center square.");
@@ -112,6 +85,7 @@ public class Controller {
             } else {
                 view.showMessage("Word accepted! Your score has been updated.");
                 model.nextTurn(); // Move to the next player
+                reenablePlayerTiles();
                 if (model.isGameOver()) {
                     endGame();
                 }
@@ -122,8 +96,13 @@ public class Controller {
         }
     }
 
+    private void reenablePlayerTiles() {
+        for (JButton tileButton : view.getPlayerTiles()) {
+            tileButton.setEnabled(true);
+            tileButton.setBackground(null);
+        }
+    }
 
-    // should be a model method, maybe add a while(1) if model = null, trigger
     private void endGame() {
         List<Player> players = model.getPlayers();
         StringBuilder finalScores = new StringBuilder("Game Over! Final Scores:\n");
@@ -132,6 +111,4 @@ public class Controller {
         }
         view.showMessage(finalScores.toString());
     }
-
-
 }
