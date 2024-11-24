@@ -89,6 +89,15 @@ public class Model {
         players.add(player);
     }
 
+    public void addAiPlayers(int numAiPlayers) {
+        for (int i = 0; i < numAiPlayers; i++) {
+            AiPlayer aiPlayer = new AiPlayer("AI " + (i + 1), getWordList(), this);
+            aiPlayer.replenishTiles(tileBag);
+            players.add(aiPlayer);
+
+        }
+    }
+
     /**
      * Gets the current player.
      *
@@ -113,6 +122,7 @@ public class Model {
 
         board[row][col] = tile;
         currentTurnPlacements.put(new Position(row, col), tile);
+        getCurrentPlayer().removeTile(tile);
         notifyObservers("tilePlaced");
         return true;
     }
@@ -135,15 +145,16 @@ public class Model {
         List<String> newWords = getAllNewWords();
         System.out.println(newWords);
         if (newWords.isEmpty()) {
+            //revertPlacements();  // should this be here? adding it
             restorePlayerTiles();
             notifyObservers("noWordFound");
-
             return false; // No tiles placed
         }
 
         // Validate all new words
         for (String word : newWords) {
             if (!validateWord(word)) {
+                //revertPlacements();  // should this be here? adding it
                 restorePlayerTiles();
                 notifyObservers("invalidWord");
                 return false; // At least one word is invalid
@@ -184,7 +195,7 @@ public class Model {
      *
      * @return a list of new words
      */
-    private List<String> getAllNewWords() {
+    public List<String> getAllNewWords() {
         List<String> newWords = new ArrayList<>();
         Set<String> uniqueWords = new HashSet<>();
 
@@ -250,13 +261,17 @@ public class Model {
         return wordlist.contains(word.toLowerCase());
     }
 
+    private Set<String> getWordList() {
+        return wordlist;
+    }
+
     /**
      * Calculates the total score for a list of words.
      *
      * @param words the list of words to calculate the score for
      * @return the total score
      */
-    private int calculateTotalScore(List<String> words) {
+    public int calculateTotalScore(List<String> words) {
         int total = 0;
         for (String word : words) {
             total += calculateWordScore(word);
@@ -270,7 +285,7 @@ public class Model {
      * @param word the word to calculate the score for
      * @return the score for the word
      */
-    private int calculateWordScore(String word) {
+    public int calculateWordScore(String word) {
         int score = 0;
         // Implement premium squares logic here (to be done in Milestone 3)
         // For now, sum the tile scores
@@ -336,13 +351,6 @@ public class Model {
         return board[center][center] != '\0'; // Check if the center tile is occupied
     }
 
-
-    /**
-     * Applies the current turn's placements to the main board.
-     */
-    private void applyPlacements() {
-        // Since we placed tiles directly on the main board in placeTile(), no action needed
-    }
 
     // Clear current turn placements (if any)
     private void clearPlacements() {
@@ -459,7 +467,7 @@ public class Model {
      * @param col the column of the position
      * @return true if the position is valid, false otherwise
      */
-    private boolean isValidPosition(int row, int col) {
+    public boolean isValidPosition(int row, int col) {
         return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
     }
 
@@ -471,4 +479,6 @@ public class Model {
     public int getBoardSize() {
         return boardSize;
     }
+
+
 }

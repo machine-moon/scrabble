@@ -6,19 +6,14 @@ import model.Player;
 import view.View;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 
 public class Game {
 
     public static void main(String[] args) {
 
-        int boardSize;
-        int numPlayers;
-
         // Ask for board size
+        int boardSize;
         while (true) {
             try {
                 boardSize = Integer.parseInt(JOptionPane.showInputDialog("Enter board size:"));
@@ -32,7 +27,20 @@ public class Game {
             }
         }
 
+        // ask for number of AI players
+        int numAiPlayers;
+        while (true) {
+            try {
+                numAiPlayers = Integer.parseInt(JOptionPane.showInputDialog("Enter number of AI players:"));
+                break;
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Invalid input. Please enter a valid integer for number of AI players.");
+            }
+        }
+
+
         // Ask for number of players
+        int numPlayers;
         while (true) {
             try {
                 numPlayers = Integer.parseInt(JOptionPane.showInputDialog("Enter number of players:"));
@@ -41,7 +49,6 @@ public class Game {
                 JOptionPane.showMessageDialog(null, "Invalid input. Please enter a valid integer for number of players.");
             }
         }
-
 
 
         // Initialize the model
@@ -53,7 +60,8 @@ public class Game {
             model.addPlayer(new Player(playerName));
         }
 
-
+        // add AI players
+        model.addAiPlayers(numAiPlayers);
 
 
         // Initialize the view

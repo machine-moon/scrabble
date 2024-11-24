@@ -24,6 +24,15 @@ public class Player {
     }
 
     /**
+     * Checks if the player is an AI player.
+     *
+     * @return true if the player is an AI player, false otherwise
+     */
+    public boolean isAi() {
+        return false;
+    }
+
+    /**
      * Gets the player's name.
      *
      * @return the player's name

@@ -1,5 +1,6 @@
 package controller;
 
+import model.AiPlayer;
 import model.Model;
 import model.Player;
 import view.View;
@@ -57,10 +58,6 @@ public class Controller {
     public void onBoardCellClicked(int row, int col, JButton cellButton) {
         if (selectedPlayerChar != null) {
             if (model.placeTile(selectedPlayerChar, row, col)) {
-                // Remove the tile from the player's rack
-                model.getCurrentPlayer().removeTile(selectedPlayerChar);
-                // Update the view through the model event "tilePlaced"
-                view.update("tilePlaced", model);
                 selectedPlayerChar = null;
                 selectedPlayerTileBtn = null;
             }
@@ -71,6 +68,7 @@ public class Controller {
         model.restorePlayerTiles();
         model.nextTurn();
         reenablePlayerTiles();
+        handleAITurn();
     }
 
     public void onSubmitButtonClicked() {
@@ -82,6 +80,8 @@ public class Controller {
                 reenablePlayerTiles();
                 if (model.isGameOver()) {
                     endGame();
+                } else {
+                    handleAITurn();
                 }
             }
         }
@@ -101,5 +101,28 @@ public class Controller {
             finalScores.append(player.getName()).append(": ").append(player.getScore()).append("\n");
         }
         view.showMessage(finalScores.toString());
+    }
+
+
+    private void handleAITurn() {
+        while (model.getCurrentPlayer().isAi()) {
+            AiPlayer aiPlayer = (AiPlayer) model.getCurrentPlayer();
+            boolean moveMade = false;
+            for (int attempt = 1; attempt <= 3; attempt++) {
+                if (aiPlayer.play()) {
+                    moveMade = true;
+                    break;
+                }
+            }
+            if (!moveMade) {
+                view.showMessage(aiPlayer.getName() + " skipped their turn after 3 failed attempts.");
+            }
+            model.nextTurn(); // Move to the next player
+            reenablePlayerTiles();
+            if (model.isGameOver()) {
+                endGame();
+                break;
+            }
+        }
     }
 }
