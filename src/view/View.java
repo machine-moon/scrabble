@@ -1,6 +1,5 @@
 package view;
 
-
 import model.Model;
 import model.ModelObserver;
 import model.Player;
@@ -21,31 +20,22 @@ public class View extends JFrame implements ModelObserver {
     private JLabel statusLabel;
     private List<JButton> playerTiles;
 
-
-    private JButton selectedTileButton; //del this?
+    private JButton selectedTileButton;
     private JButton submitButton;
     private JButton skipTurnButton;
 
-
-    // stuff the update() method will update.
-    private int boardSize; // init update method
+    private int boardSize;
     private int center;
-
-    private Player currentPlayer;
-    private char[][] board;
-
 
     public View(int boardSize) {
         this.boardSize = boardSize;
         this.center = boardSize / 2;
-        // GUI setup ONLY. Setup ups are in order of declaration.
 
         // Setup JFrame
         setTitle("Scrabble Game");
         setSize(800, 900);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-
 
         // Board panel
         boardPanel = new JPanel();
@@ -59,9 +49,6 @@ public class View extends JFrame implements ModelObserver {
                 boardPanel.add(cellButton);
             }
         }
-
-
-        add(boardPanel, BorderLayout.CENTER);
 
         // Tile rack panel
         tileRackPanel = new JPanel(new FlowLayout());
@@ -87,14 +74,12 @@ public class View extends JFrame implements ModelObserver {
 
         // Submit button
         submitButton = new JButton("Submit");
+        add(submitButton, BorderLayout.EAST);
 
         // Skip turn button
         skipTurnButton = new JButton("Skip Turn");
-
-        add(submitButton, BorderLayout.EAST);
         add(skipTurnButton, BorderLayout.WEST);
 
-        // The game isn't actually ready till the controller says so, via the update() method
         setVisible(false);
     }
 
@@ -102,11 +87,8 @@ public class View extends JFrame implements ModelObserver {
         JButton cellButton = new JButton();
         cellButton.setFont(new Font("Arial", Font.PLAIN, 20));
         cellButton.setFocusable(false);
-
-        // Highlight the center tile
         cellButton.setBackground((row == center && col == center) ? Color.orange : Color.LIGHT_GRAY);
         cellButton.setOpaque(row == center && col == center);
-
         return cellButton;
     }
 
@@ -126,41 +108,26 @@ public class View extends JFrame implements ModelObserver {
         return skipTurnButton;
     }
 
-    /**
-     * Updates the game board with the given board state.
-     *
-     * @param board the board state to update
-     */
     public void updateBoard(char[][] board) {
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
                 JButton cell = getBoardCellButton(row, col);
                 char c = board[row][col];
                 cell.setText(c == '\0' ? "" : String.valueOf(c));
-                // Reapply center tile styling to maintain its special appearance
-
                 cell.setBackground((row == center && col == center) ? Color.orange : Color.LIGHT_GRAY);
-                // also reapply premium tiles styling
-
             }
         }
         boardPanel.revalidate();
         boardPanel.repaint();
     }
 
-
-    /**
-     * Updates the tile rack with the given tiles.
-     *
-     * @param tiles the tiles to update
-     */
     public void loadPlayerTiles(List<Character> tiles) {
         for (int i = 0; i < tiles.size(); i++) {
             if (tiles.get(i) != '\0') {
                 playerTiles.get(i).setText(tiles.get(i).toString());
                 playerTiles.get(i).setVisible(true);
             } else {
-                playerTiles.get(i).setText("\0"); // don't know if this is the right move, but well preserve.
+                playerTiles.get(i).setText("\0");
                 playerTiles.get(i).setVisible(false);
             }
         }
@@ -168,29 +135,15 @@ public class View extends JFrame implements ModelObserver {
         tileRackPanel.repaint();
     }
 
-
-    /**
-     * Updates the status label with the given player.
-     *
-     * @param p the player to update
-     */
     public void updateStatus(Player p) {
         String status = "Current player: " + p.getName() + " | Score: " + p.getScore();
         statusLabel.setText(status);
     }
 
-    /**
-     * Displays a message to the user.
-     *
-     * @param message the message to display
-     */
     public void showMessage(String message) {
         JOptionPane.showMessageDialog(this, message);
     }
 
-    /**
-     * Deselects the currently selected tile.
-     */
     public void deselectTile() {
         if (selectedTileButton != null) {
             selectedTileButton.setBackground(null);
@@ -198,24 +151,14 @@ public class View extends JFrame implements ModelObserver {
         }
     }
 
-
     @Override
     public void update(String message, Model m) {
-        // handle different types of updates
         switch (message) {
             case "initialize":
-                // note sure to make this its own event like updateVars or maybe put it outside... or just stream from model like below.
-                // load the variables from the model
                 this.boardSize = m.getBoardSize();
                 this.center = boardSize / 2;
-                this.currentPlayer = m.getCurrentPlayer();
-
-
-                // -----I REFACTOR TO MOVE IT HERE JUST FINE.
-                //initializeBoard();  //refactored, get board size from view and do ALL initialization in constructor
                 loadPlayerTiles(m.getCurrentPlayer().getTiles());
                 updateStatus(m.getCurrentPlayer());
-                // -----
                 setVisible(true);
                 break;
             case "board":
@@ -229,20 +172,10 @@ public class View extends JFrame implements ModelObserver {
                 break;
             case "gameOver":
                 showMessage("Game Over!");
-                // tear down the view
-                // maybe add a button to restart the game?
-                // joptionpane to displayer winner
-                // ask the model who won, m.getWinner().getName()
-                // scoreboard?
-
-
                 setVisible(false);
                 break;
-
             default:
                 break;
         }
-
     }
-
 }

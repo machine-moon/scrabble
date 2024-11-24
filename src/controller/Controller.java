@@ -1,5 +1,6 @@
 package controller;
 
+import model.AIPlayer;
 import model.Model;
 import model.Player;
 import view.View;
@@ -23,11 +24,9 @@ public class Controller {
         selectedPlayerChar = null;
         selectedPlayerTileBtn = null;
 
-
         // Add action listeners to view components
         view.getSubmitButton().addActionListener(e -> onSubmitButtonClicked());
         view.getSkipTurnButton().addActionListener(e -> onSkipTurnClicked());
-
 
         // Loop through each cell button in the board and add action listener to each board cell button
         for (int row = 0; row < model.getBoardSize(); row++) {
@@ -44,7 +43,8 @@ public class Controller {
             tileButton.addActionListener(e -> onPlayerTileSelected(tileButton));
         }
 
-
+        // Check if the current player is an AI player and make a move if so
+        checkAndPlayAIMove();
     }
 
     /**
@@ -72,16 +72,14 @@ public class Controller {
     public void onBoardCellClicked(int row, int col, JButton cellButton) {
         if (selectedPlayerChar != null) {
             if (model.placeTile(selectedPlayerChar, row, col)) {
-                // against doing this.
                 // Remove the tile from the player's rack
                 model.getCurrentPlayer().removeTile(selectedPlayerChar);
-                // --- Update the view through the model event "tile placed"
+                // Update the view through the model event "tile placed"
                 selectedPlayerTileBtn.setEnabled(false);
                 selectedPlayerTileBtn.setBackground(null);
                 cellButton.setText(selectedPlayerChar.toString());
                 cellButton.setEnabled(false);
                 cellButton.setBackground(null);
-                // ---
                 selectedPlayerChar = null;
                 selectedPlayerTileBtn = null;
             } else {
@@ -98,13 +96,13 @@ public class Controller {
     public void onSkipTurnClicked() {
         model.restorePlayerTiles();
         model.nextTurn();
+        checkAndPlayAIMove();
     }
 
     /**
      * This method is called when the user clicks the "Submit" button.
      */
     public void onSubmitButtonClicked() {
-
         if (model.submitWord()) {
             if (model.isFirstTurn() && !model.isCenterCovered()) {
                 view.showMessage("First word must be placed covering the center square.");
@@ -114,6 +112,8 @@ public class Controller {
                 model.nextTurn(); // Move to the next player
                 if (model.isGameOver()) {
                     endGame();
+                } else {
+                    checkAndPlayAIMove();
                 }
             }
         } else {
@@ -122,8 +122,6 @@ public class Controller {
         }
     }
 
-
-    // should be a model method, maybe add a while(1) if model = null, trigger
     private void endGame() {
         List<Player> players = model.getPlayers();
         StringBuilder finalScores = new StringBuilder("Game Over! Final Scores:\n");
@@ -133,5 +131,19 @@ public class Controller {
         view.showMessage(finalScores.toString());
     }
 
-
+    /**
+     * Checks if the current player is an AI player and makes a move if so.
+     */
+    private void checkAndPlayAIMove() {
+        Player currentPlayer = model.getCurrentPlayer();
+        if (currentPlayer instanceof AIPlayer) {
+            ((AIPlayer) currentPlayer).playBestMove(model);
+            model.nextTurn();
+            if (model.isGameOver()) {
+                endGame();
+            } else {
+                checkAndPlayAIMove();
+            }
+        }
+    }
 }

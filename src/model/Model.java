@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-
 /**
  * Represents the game model.
  */
@@ -21,7 +20,6 @@ public class Model {
     private int boardSize;
     private Map<Position, Character> currentTurnPlacements;
     private boolean isFirstTurn;
-
 
     /**
      * Initializes the game model with the specified board size.
@@ -94,19 +92,27 @@ public class Model {
      *
      * @return the current player
      */
-    public boolean placeTile(char tile, int row, int col) {
+    public Player getCurrentPlayer() {
+        return players.get(currentPlayerIndex);
+    }
 
-        // check if the player has the tile
+    /**
+     * Places a tile on the board.
+     *
+     * @param tile the tile to place
+     * @param row  the row to place the tile
+     * @param col  the column to place the tile
+     * @return true if the tile was placed successfully, false otherwise
+     */
+    public boolean placeTile(char tile, int row, int col) {
         if (!(getCurrentPlayer().hasTile(tile))) {
             return false;
         }
 
-        // check if the position is valid
         if (!isValidPosition(row, col)) {
             return false;
         }
 
-        // check if the position is empty
         if (board[row][col] != '\0') {
             return false;
         }
@@ -133,40 +139,29 @@ public class Model {
      */
     public boolean submitWord() {
         List<String> newWords = getAllNewWords();
-        System.out.println(newWords);
         if (newWords.isEmpty()) {
-            return false; // No tiles placed
+            return false;
         }
 
-        // Validate all new words
         for (String word : newWords) {
             if (!validateWord(word)) {
-                return false; // At least one word is invalid
+                return false;
             }
         }
 
-        // All words are valid, calculate total score
         int totalScore = calculateTotalScore(newWords);
-        System.out.println(totalScore);
         getCurrentPlayer().addScore(totalScore);
-        System.out.println(getCurrentPlayer().getScore());
-
-        // After validation, replenish player's tiles
         getCurrentPlayer().replenishTiles(tileBag);
-
-        // Clear current turn placements
         clearPlacements();
 
-        // Check if this was the first turn and validate center coverage
         if (isFirstTurn) {
             if (!coversCenter()) {
-                // Invalid first move; revert placements
                 revertPlacements();
                 getCurrentPlayer().deductScore(totalScore);
                 notifyObservers("Tile must Cover Centre");
                 return false;
             }
-            isFirstTurn = false; // First turn completed
+            isFirstTurn = false;
         }
 
         notifyObservers("Word Submitted");
@@ -183,14 +178,12 @@ public class Model {
         Set<String> uniqueWords = new HashSet<>();
 
         for (Position pos : currentTurnPlacements.keySet()) {
-            // Check horizontal word
             String horizontalWord = getWordAtPosition(pos.row, pos.col, true);
             if (horizontalWord.length() > 1 && !uniqueWords.contains(horizontalWord)) {
                 newWords.add(horizontalWord);
                 uniqueWords.add(horizontalWord);
             }
 
-            // Check vertical word
             String verticalWord = getWordAtPosition(pos.row, pos.col, false);
             if (verticalWord.length() > 1 && !uniqueWords.contains(verticalWord)) {
                 newWords.add(verticalWord);
@@ -214,7 +207,6 @@ public class Model {
         int deltaRow = isHorizontal ? 0 : -1;
         int deltaCol = isHorizontal ? -1 : 0;
 
-        // Move to the start of the word
         int currentRow = row;
         int currentCol = col;
         while (isValidPosition(currentRow + deltaRow, currentCol + deltaCol) &&
@@ -223,7 +215,6 @@ public class Model {
             currentCol += deltaCol;
         }
 
-        // Move forward and build the word
         deltaRow = isHorizontal ? 0 : 1;
         deltaCol = isHorizontal ? 1 : 0;
         while (isValidPosition(currentRow, currentCol) &&
@@ -268,8 +259,6 @@ public class Model {
      */
     private int calculateWordScore(String word) {
         int score = 0;
-        // Implement premium squares logic here (to be done in Milestone 3)
-        // For now, sum the tile scores
         for (char c : word.toCharArray()) {
             score += getTileScore(c);
         }
@@ -329,9 +318,8 @@ public class Model {
      */
     public boolean isCenterCovered() {
         int center = boardSize / 2;
-        return board[center][center] != '\0'; // Check if the center tile is occupied
+        return board[center][center] != '\0';
     }
-
 
     /**
      * Applies the current turn's placements to the main board.
@@ -340,12 +328,12 @@ public class Model {
         // Since we placed tiles directly on the main board in placeTile(), no action needed
     }
 
-    // Clear current turn placements (if any)
+    /**
+     * Clears the current turn placements.
+     */
     private void clearPlacements() {
         currentTurnPlacements.clear();
     }
-
-    // Revert placements if invalid (used for first turn center coverage)
 
     /**
      * Reverts the current turn's placements.
@@ -377,20 +365,12 @@ public class Model {
     }
 
     /**
-     * Gets the current player's tiles.
-     *
-     * @return the current player's tiles
-     */
-    public Player getCurrentPlayer() {
-        return players.get(currentPlayerIndex);
-    }
-
-    /**
      * Moves to the next player's turn.
      */
     public void nextTurn() {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         notifyObservers("Next player's turn");
+        checkAndPlayAIMove();
     }
 
     /**
@@ -399,7 +379,6 @@ public class Model {
      * @return true if the game is over, false otherwise
      */
     public boolean isGameOver() {
-        // Example condition: when the tile bag is empty and a player has no tiles left
         return tileBag.isEmpty() && players.stream().anyMatch(player -> player.getTiles().isEmpty());
     }
 
@@ -438,7 +417,7 @@ public class Model {
         for (Position pos : currentTurnPlacements.keySet()) {
             char tile = board[pos.row][pos.col];
             currentPlayer.addTile(tile);
-            board[pos.row][pos.col] = '\0'; // Remove the tile from the board
+            board[pos.row][pos.col] = '\0';
         }
         clearPlacements();
         notifyObservers("Tiles Restored");
@@ -462,5 +441,30 @@ public class Model {
      */
     public int getBoardSize() {
         return boardSize;
+    }
+
+    /**
+     * Calculates the score of a move.
+     *
+     * @param moves the list of moves to calculate the score for
+     * @return the score of the move
+     */
+    public int calculateMoveScore(List<Move> moves) {
+        int score = 0;
+        for (Move move : moves) {
+            score += getTileScore(move.getTile());
+        }
+        return score;
+    }
+
+    /**
+     * Checks if the current player is an AI player and makes a move if so.
+     */
+    private void checkAndPlayAIMove() {
+        Player currentPlayer = getCurrentPlayer();
+        if (currentPlayer instanceof AIPlayer) {
+            ((AIPlayer) currentPlayer).playBestMove(this);
+            nextTurn();
+        }
     }
 }

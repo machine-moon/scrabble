@@ -1,7 +1,7 @@
 package model;
 
 /**
- * Represents a position in the maze.
+ * Represents a position on the board.
  */
 public class Position {
     public final int row;

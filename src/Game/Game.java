@@ -1,15 +1,12 @@
 package Game;
 
 import controller.Controller;
+import model.AIPlayer;
 import model.Model;
 import model.Player;
 import view.View;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class Game {
 
@@ -42,19 +39,18 @@ public class Game {
             }
         }
 
-
-
         // Initialize the model
         Model model = Model.getInstance(boardSize);
 
-        // add players
+        // Add players
         for (int i = 1; i <= numPlayers; i++) {
-            String playerName = JOptionPane.showInputDialog("Enter name for player " + i + ":");
-            model.addPlayer(new Player(playerName));
+            String playerName = JOptionPane.showInputDialog("Enter name for player " + i + " (or type 'AI' for an AI player):");
+            if (playerName.equalsIgnoreCase("AI")) {
+                model.addPlayer(new AIPlayer("AI Player " + i));
+            } else {
+                model.addPlayer(new Player(playerName));
+            }
         }
-
-
-
 
         // Initialize the view
         View view = new View(boardSize);
