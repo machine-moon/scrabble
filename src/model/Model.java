@@ -142,8 +142,14 @@ public class Model {
      * @return true if the word placements are valid, false otherwise
      */
     public boolean submitWord() {
+        if (!isFirstTurn && !hasAdjacentTiles()) {
+            restorePlayerTiles(); // Undo invalid move
+            notifyObservers("noAdjacentTiles");
+            return false;
+        }
+
+
         List<String> newWords = getAllNewWords();
-        System.out.println(newWords);
         if (newWords.isEmpty()) {
             //revertPlacements();  // should this be here? adding it
             restorePlayerTiles();
@@ -163,9 +169,7 @@ public class Model {
 
         // All words are valid, calculate total score
         int totalScore = calculateTotalScore(newWords);
-        System.out.println(totalScore);
         getCurrentPlayer().addScore(totalScore);
-        System.out.println(getCurrentPlayer().getScore());
 
         // After validation, replenish player's tiles
         getCurrentPlayer().replenishTiles(tileBag);
@@ -189,6 +193,32 @@ public class Model {
         notifyObservers("wordSubmitted");
         return true;
     }
+
+
+    private boolean hasAdjacentTiles() {
+        for (Position pos : currentTurnPlacements.keySet()) {
+            int row = pos.row;
+            int col = pos.col;
+
+            if (isValidPosition(row - 1, col) && board[row - 1][col] != '\0' && !currentTurnPlacements.containsKey(new Position(row - 1, col))) {
+                return true;
+            }
+
+            if (isValidPosition(row + 1, col) && board[row + 1][col] != '\0' && !currentTurnPlacements.containsKey(new Position(row + 1, col))) {
+                return true;
+            }
+
+            if (isValidPosition(row, col - 1) && board[row][col - 1] != '\0' && !currentTurnPlacements.containsKey(new Position(row, col - 1))) {
+                return true;
+            }
+
+            if (isValidPosition(row, col + 1) && board[row][col + 1] != '\0' && !currentTurnPlacements.containsKey(new Position(row, col + 1))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Gets all new words formed by the current turn's placements.
