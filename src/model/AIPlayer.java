@@ -42,10 +42,9 @@ public class AIPlayer extends Player {
      */
     private List<List<Move>> generateAllMoves(Model model) {
         List<List<Move>> allMoves = new ArrayList<>();
-        // Implement logic to generate all possible moves
-        // This can be optimized by considering only a subset of moves if necessary
-        // Example: Generate moves for each tile in the player's rack
-        for (char tile : getTiles()) {
+        // Make a copy of the tiles list to avoid ConcurrentModificationException
+        List<Character> tilesCopy = new ArrayList<>(getTiles());
+        for (char tile : tilesCopy) {
             for (int row = 0; row < model.getBoardSize(); row++) {
                 for (int col = 0; col < model.getBoardSize(); col++) {
                     if (model.placeTile(tile, row, col)) {

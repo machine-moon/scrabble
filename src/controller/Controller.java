@@ -9,9 +9,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-/**
- * The Controller class handles the game logic and user interactions.
- */
 public class Controller {
     private Model model;
     private View view;
@@ -24,11 +21,9 @@ public class Controller {
         selectedPlayerChar = null;
         selectedPlayerTileBtn = null;
 
-        // Add action listeners to view components
         view.getSubmitButton().addActionListener(e -> onSubmitButtonClicked());
         view.getSkipTurnButton().addActionListener(e -> onSkipTurnClicked());
 
-        // Loop through each cell button in the board and add action listener to each board cell button
         for (int row = 0; row < model.getBoardSize(); row++) {
             for (int col = 0; col < model.getBoardSize(); col++) {
                 JButton cellButton = view.getBoardCellButton(row, col);
@@ -38,43 +33,27 @@ public class Controller {
             }
         }
 
-        // Add action listeners to player tile rack buttons
         for (JButton tileButton : view.getPlayerTiles()) {
             tileButton.addActionListener(e -> onPlayerTileSelected(tileButton));
         }
 
-        // Check if the current player is an AI player and make a move if so
         checkAndPlayAIMove();
     }
 
-    /**
-     * This method is called when a tile is selected from the tile rack.
-     *
-     * @param tileButton the button representing the selected tile
-     */
     public void onPlayerTileSelected(JButton tileButton) {
         if (selectedPlayerTileBtn != null) {
-            selectedPlayerTileBtn.setBackground(null); // Deselect previous tile
+            selectedPlayerTileBtn.setBackground(null);
         }
 
         selectedPlayerChar = tileButton.getText().charAt(0);
         selectedPlayerTileBtn = tileButton;
-        // Highlight selected tile
         tileButton.setBackground(Color.CYAN);
     }
 
-    /**
-     * This method is called when a tile is placed on the board.
-     *
-     * @param row the row of the board cell
-     * @param col the column of the board cell
-     */
     public void onBoardCellClicked(int row, int col, JButton cellButton) {
         if (selectedPlayerChar != null) {
             if (model.placeTile(selectedPlayerChar, row, col)) {
-                // Remove the tile from the player's rack
                 model.getCurrentPlayer().removeTile(selectedPlayerChar);
-                // Update the view through the model event "tile placed"
                 selectedPlayerTileBtn.setEnabled(false);
                 selectedPlayerTileBtn.setBackground(null);
                 cellButton.setText(selectedPlayerChar.toString());
@@ -90,18 +69,12 @@ public class Controller {
         }
     }
 
-    /**
-     * This method is called when the user clicks the "Skip Turn" button.
-     */
     public void onSkipTurnClicked() {
         model.restorePlayerTiles();
         model.nextTurn();
         checkAndPlayAIMove();
     }
 
-    /**
-     * This method is called when the user clicks the "Submit" button.
-     */
     public void onSubmitButtonClicked() {
         if (model.submitWord()) {
             if (model.isFirstTurn() && !model.isCenterCovered()) {
@@ -109,7 +82,7 @@ public class Controller {
                 model.restorePlayerTiles();
             } else {
                 view.showMessage("Word accepted! Your score has been updated.");
-                model.nextTurn(); // Move to the next player
+                model.nextTurn();
                 if (model.isGameOver()) {
                     endGame();
                 } else {
@@ -131,9 +104,6 @@ public class Controller {
         view.showMessage(finalScores.toString());
     }
 
-    /**
-     * Checks if the current player is an AI player and makes a move if so.
-     */
     private void checkAndPlayAIMove() {
         Player currentPlayer = model.getCurrentPlayer();
         if (currentPlayer instanceof AIPlayer) {
