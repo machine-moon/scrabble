@@ -55,6 +55,13 @@ Advanced game rules like premium squares and word multipliers - achieved partial
 Multi-language dictionary support 
 Better error handling and addition of tooltips
 
+## Known Bugs
+
+- Word placed somewhere besides center does not get removed
+- Ai words are not in words list
+- After placing word anywhere besides center, the tiles get highlighted for some reason
+- Player tiles don't get returned after placing word anywhere besides the center
+  
 ## License
 
 This open-source project comes under the Open Source License, allowing free usage and modification without any restriction.
