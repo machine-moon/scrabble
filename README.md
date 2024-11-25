@@ -10,9 +10,11 @@ This project is a Java version of the Scrabble game, which has been designed usi
 ## Project Structure
 
 * **Controller.java**: In this program, the Controller acts like an intermediary between the `Model`, the game's logic, and the `View`, the user interface. It processes the moves the player makes and updates changes in the state of the game.
-- **Main.java**: entry point; instantiates and wires the game components of Model, View, and Controller and launches the game.
+- **Game.java**: entry point; instantiates and wires the game components of Model, View, and Controller and launches the game.
 - **Model.java**: responsible for the business logic of the game; it maintains the game board, players, and tile bag, implementing all the rules of Scrabble.
 - **ModelObserver.java**: defines an interface for listeners of `Model` changes; allows the `View` to update its state whenever the `Model` changes.
+- **AiPlayer.java**: represents an AI player in the game which uses a defined strategy to place words in the game 
+- **ModelTest.java**: tests the model of the game. Tests the functioning of the game, word placement, scoring, turns and edge cases.
 - **Player.java**: represents a player; he maintains his current score, his tile rack, and the moves that he has made.
 - **Position.java**: Helper class for position handling on the board game, used in tile placement.
 - **TileBag.java**: The bag holding all the tiles that are being drawn by the players; in charge of drawing new tiles and keeping track of how many tiles are left in the bag.
@@ -31,6 +33,14 @@ This project is a Java version of the Scrabble game, which has been designed usi
 - **Word Validator**: A check of every word played, against a predetermined word list, to assure only Scrabble legal words are accepted.
 - **Scoring Calculations**: The calculation and tracking of the current score of players placing valid words on the board.
 - **Dynamic Board Update**: The board and player scores would dynamically update as the players make moves.
+- **New AI popup**: asks for the number of ai players
+- **Names of players**: asks for names of all human players in the game
+- **Updated game board**: The game board now contains mutliple premium scores which allow for scoring of multiple points when a word is formed using them
+- **Words placed by AI**: AI now places words on the board following a decided strategy to keep the game competitive and interesting
+- **Player tiles changing**: Fixed bug from previous version, the players tiles now get changed once a word is placed on the board
+- **New pop-up for not starting game from center:** A new pop-up now appears warning of how player cannot start the game anywhere besides center
+- **New pop-up - Human must play first:** A new pop-up appears warning of how humans must play the first move
+
 
 ## Technologies Used
 
@@ -38,11 +48,11 @@ This project is a Java version of the Scrabble game, which has been designed usi
 - **Swing**: For designing the GUI.
 MVC Architecture: Logics of game, user interface, and handling the interactions further segregate to keep the code clean and maintainable.
 
-## Future Improvements
+## Future Improvements (Updated with current version)
 
-Advanced GUI for an overall interesting user experience
-Advanced game rules like premium squares and word multipliers
-Multi-language dictionary support
+Advanced GUI for an overall interesting user experience - achieved partially 
+Advanced game rules like premium squares and word multipliers - achieved partially
+Multi-language dictionary support 
 Better error handling and addition of tooltips
 
 ## License
