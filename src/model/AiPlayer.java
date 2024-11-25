@@ -3,21 +3,41 @@ package model;
 import java.util.*;
 
 
+/**
+ * Represents an AI player in the game.
+ */
 public class AiPlayer extends Player {
     private final Set<String> wordlist;
     private Model model;
 
+    /**
+     * Constructs an AI player with the specified name, wordlist, and model.
+     *
+     * @param name     the name of the AI player
+     * @param wordlist the wordlist
+     * @param m        the model
+     */
     public AiPlayer(String name, Set<String> wordlist, Model m) {
         super(name);
         this.wordlist = wordlist;
         this.model = m;
     }
 
+    /**
+     * Checks if the player is an AI player.
+     *
+     * @return true if the player is an AI player, false otherwise
+     */
     @Override
     public boolean isAi() {
         return true;
     }
 
+    /**
+     * Plays a turn for the AI player.
+     *
+     * @return true if the AI player successfully played a word, false otherwise
+     */
     public boolean play() {
         List<Character> tiles = getTiles();
         // force cut off the tiles to 7
@@ -45,12 +65,16 @@ public class AiPlayer extends Player {
         }
 
 
-
-
         System.out.println(getName() + " could not find a valid move.");
         return false;
     }
 
+    /**
+     * Generates all possible combinations of tiles.
+     *
+     * @param tiles the tiles
+     * @return all possible combinations of tiles
+     */
     private Set<String> generateAllCombinations(List<Character> tiles) {
         Set<String> combinations = new HashSet<>();
         for (int i = 1; i <= tiles.size(); i++) {
@@ -59,6 +83,14 @@ public class AiPlayer extends Player {
         return combinations;
     }
 
+    /**
+     * Generates all possible combinations of tiles with the specified length.
+     *
+     * @param tiles        the tiles
+     * @param prefix       the prefix
+     * @param length       the length
+     * @param combinations the set of combinations
+     */
     private void generateCombinations(List<Character> tiles, String prefix, int length, Set<String> combinations) {
         if (length == 0) {
             combinations.add(prefix);
@@ -71,6 +103,12 @@ public class AiPlayer extends Player {
         }
     }
 
+    /**
+     * Filters out invalid words from the set of possible words.
+     *
+     * @param possibleWords the set of possible words
+     * @return the set of valid words
+     */
     private Set<String> filterValidWords(Set<String> possibleWords) {
         Set<String> validWords = new HashSet<>();
         for (String word : possibleWords) {
@@ -81,7 +119,13 @@ public class AiPlayer extends Player {
         return validWords;
     }
 
-
+    /**
+     * Tries to place a word on the board.
+     *
+     * @param model the model
+     * @param word  the word to place
+     * @return true if the word was successfully placed, false otherwise
+     */
     private boolean tryPlaceWord(Model model, String word) {
         int boardSize = model.getBoardSize();
         List<int[]> positions = new ArrayList<>();
@@ -112,6 +156,16 @@ public class AiPlayer extends Player {
         return false;
     }
 
+    /**
+     * Checks if a word can be placed on the board at the specified position.
+     *
+     * @param model        the model
+     * @param word         the word to place
+     * @param row          the row
+     * @param col          the column
+     * @param isHorizontal true if the word is placed horizontally, false if vertically
+     * @return true if the word can be placed, false otherwise
+     */
     private boolean canPlaceWord(Model model, String word, int row, int col, boolean isHorizontal) {
         char[][] boardState = model.getBoardState();
         boolean hasAdjacent = false;
@@ -133,6 +187,15 @@ public class AiPlayer extends Player {
         return hasAdjacent;
     }
 
+    /**
+     * Places a word on the board at the specified position.
+     *
+     * @param model        the model
+     * @param word         the word to place
+     * @param row          the row
+     * @param col          the column
+     * @param isHorizontal true if the word is placed horizontally, false if vertically
+     */
     private void placeWord(Model model, String word, int row, int col, boolean isHorizontal) {
         for (int i = 0; i < word.length(); i++) {
             int currentRow = isHorizontal ? row : row + i;

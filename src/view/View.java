@@ -34,9 +34,19 @@ public class View extends JFrame implements ModelObserver {
     private Player currentPlayer;
     private char[][] board;
 
-    private boolean displayMessages=true;
+    private boolean displayMessages = true;
 
+    private final Color DARK_RED = new Color(139, 0, 0); // Dark Red
+    private final Color DARK_PINK = new Color(255, 182, 193); // Light Pink
+    private final Color DARK_BLUE = new Color(173, 216, 230); // Light Blue
+    private final Color DARK_CYAN = new Color(0, 139, 139); // Dark Cyan
+    private final Color DARK_ORANGE = new Color(255, 140, 0); // Dark Orange
 
+    /**
+     * Constructs a View with the specified board size.
+     *
+     * @param boardSize the size of the board
+     */
     public View(int boardSize) {
         this.boardSize = boardSize;
         this.center = boardSize / 2;
@@ -44,7 +54,7 @@ public class View extends JFrame implements ModelObserver {
 
         // Setup JFrame
         setTitle("Scrabble Game");
-        setSize(800, 900);
+        setSize(900, 900);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -100,6 +110,13 @@ public class View extends JFrame implements ModelObserver {
         setVisible(false);
     }
 
+    /**
+     * Initializes each cell of the game board with the appropriate color.
+     *
+     * @param row the row of the cell
+     * @param col the column of the cell
+     * @return the JButton representing the cell
+     */
     private JButton initializeEachBoardCell(int row, int col) {
         JButton cellButton = new JButton();
         cellButton.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -111,47 +128,75 @@ public class View extends JFrame implements ModelObserver {
                 (row == 7 && (col == 0 || col == 14)) ||
 
                 (row == 14 && (col == 0 || col == 7 || col == 14))) {
-            cellButton.setBackground(Color.RED);
+            cellButton.setBackground(DARK_RED);
         }
         // Double Word Score (2×WS) - Pink
-        else if ((row == col && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13)) ||
-                ((row + col == 14) && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13))) {
-            cellButton.setBackground(Color.PINK);
+        else {
+            if ((row == col && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13)) ||
+                    ((row + col == 14) && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13))) {
+                cellButton.setBackground(DARK_PINK);
+            }
+            // Triple Letter Score (3×LS) - Blue
+            else if (((row == 1 || row == 13) && (col == 5 || col == 9)) ||
+                    ((row == 5 || row == 9) && (col == 1 || col == 13)) ||
+                    (row == 5 && col == 5) || (row == 5 && col == 9) ||
+                    (row == 9 && col == 5) || (row == 9 && col == 9)) {
+                cellButton.setBackground(DARK_BLUE);
+            }
+            // Double Letter Score (2×LS) - Cyan
+            else if (((row == 0 || row == 14) && (col == 3 || col == 11)) ||
+                    ((row == 2 || row == 12) && (col == 6 || col == 8)) ||
+                    ((row == 3 || row == 11) && (col == 0 || col == 14)) ||
+                    ((row == 6 || row == 8) && (col == 2 || col == 12)) ||
+                    ((row == 6 || row == 8) && (col == 6 || col == 8))) {
+                cellButton.setBackground(DARK_CYAN);
+            }
+            // Center Tile - Orange
+            else if (row == 7 && col == 7) {
+                cellButton.setBackground(DARK_ORANGE);
+            } else {
+                cellButton.setBackground(Color.WHITE);
+            }
         }
-        // Triple Letter Score (3×LS) - Blue
-        else if (((row == 1 || row == 13) && (col == 5 || col == 9)) ||
-                ((row == 5 || row == 9) && (col == 1 || col == 13)) ||
-                (row == 5 && col == 5) || (row == 5 && col == 9) ||
-                (row == 9 && col == 5) || (row == 9 && col == 9)) {
-            cellButton.setBackground(Color.BLUE);
-        }
-        // Double Letter Score (2×LS) - Cyan
-        else if (((row == 0 || row == 14) && (col == 3 || col == 11)) ||
-                ((row == 2 || row == 12) && (col == 6 || col == 8)) ||
-                ((row == 3 || row == 11) && (col == 0 || col == 14)) ||
-                ((row == 6 || row == 8) && (col == 2 || col == 12)) ||
-                ((row == 6 || row == 8) && (col == 6 || col == 8))) {
-            cellButton.setBackground(Color.CYAN);
-        }
-        // Center Tile - Orange
-        else if (row == 7 && col == 7) { cellButton.setBackground(Color.ORANGE); }
-        else { cellButton.setBackground(Color.LIGHT_GRAY); }
 
         return cellButton;
     }
 
+    /**
+     * Returns the list of player tiles.
+     *
+     * @return the list of player tiles
+     */
     public List<JButton> getPlayerTiles() {
         return playerTiles;
     }
+
+    /**
+     * Returns the JButton representing the cell at the specified row and column.
+     *
+     * @param row the row of the cell
+     * @param col the column of the cell
+     * @return the JButton representing the cell
+     */
 
     public JButton getBoardCellButton(int row, int col) {
         return (JButton) boardPanel.getComponent(row * boardSize + col);
     }
 
+    /**
+     * Returns the submit button.
+     *
+     * @return the submit button
+     */
     public JButton getSubmitButton() {
         return submitButton;
     }
 
+    /**
+     * Returns the skip turn button.
+     *
+     * @return the skip turn button
+     */
     public JButton getSkipTurnButton() {
         return skipTurnButton;
     }
@@ -172,25 +217,25 @@ public class View extends JFrame implements ModelObserver {
                 if ((row == 0 && (col == 0 || col == 7 || col == 14)) ||
                         (row == 7 && (col == 0 || col == 14)) ||
                         (row == 14 && (col == 0 || col == 7 || col == 14))) {
-                    cell.setBackground(Color.RED); // Triple Word Score
+                    cell.setBackground(DARK_RED); // Triple Word Score
                 } else if ((row == col && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13)) ||
                         ((row + col == 14) && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13))) {
-                    cell.setBackground(Color.PINK); // Double Word Score
+                    cell.setBackground(DARK_PINK); // Double Word Score
                 } else if (((row == 1 || row == 13) && (col == 5 || col == 9)) ||
                         ((row == 5 || row == 9) && (col == 1 || col == 13)) ||
                         (row == 5 && col == 5) || (row == 5 && col == 9) ||
                         (row == 9 && col == 5) || (row == 9 && col == 9)) {
-                    cell.setBackground(Color.BLUE); // Triple Letter Score
+                    cell.setBackground(DARK_BLUE); // Triple Letter Score
                 } else if (((row == 0 || row == 14) && (col == 3 || col == 11)) ||
                         ((row == 2 || row == 12) && (col == 6 || col == 8)) ||
                         ((row == 3 || row == 11) && (col == 0 || col == 14)) ||
                         ((row == 6 || row == 8) && (col == 2 || col == 12)) ||
                         ((row == 6 || row == 8) && (col == 6 || col == 8))) {
-                    cell.setBackground(Color.CYAN); // Double Letter Score
+                    cell.setBackground(DARK_CYAN); // Double Letter Score
                 } else if (row == 7 && col == 7) {
-                    cell.setBackground(Color.ORANGE); // Center Tile
+                    cell.setBackground(DARK_ORANGE); // Center Tile
                 } else {
-                    cell.setBackground(Color.LIGHT_GRAY); // Regular Tile
+                    cell.setBackground(Color.WHITE); // Regular Tile
                 }
 
             }
@@ -225,8 +270,8 @@ public class View extends JFrame implements ModelObserver {
      *
      * @param p the player to update
      */
-    public void updateStatus(Player p) {
-        String status = "Current player: " + p.getName() + " | Score: " + p.getScore();
+    public void updateStatus(Player p, int remainingTiles) {
+        String status = "Current player: " + p.getName() + " | Score: " + p.getScore() + " | Remaining Tiles: " + remainingTiles;
         statusLabel.setText(status);
     }
 
@@ -241,7 +286,12 @@ public class View extends JFrame implements ModelObserver {
         }
     }
 
-
+    /**
+     * Handles the update method of the observer pattern.
+     *
+     * @param message the message to update
+     * @param m       the model to update
+     */
     @Override
     public void update(String message, Model m) {
         // note: keep all the handle methods are under the update method.
@@ -280,6 +330,9 @@ public class View extends JFrame implements ModelObserver {
             case "nextTurn":
                 handleNextTurn(m);
                 break;
+            case "firstTurn":
+                showMessage("Human must play first.");
+                break;
             case "gameOver":
                 handleGameOver();
                 break;
@@ -288,53 +341,92 @@ public class View extends JFrame implements ModelObserver {
         }
     }
 
-
+    /**
+     * Handles the initialize message.
+     *
+     * @param m the model to initialize
+     */
     private void handleInitialize(Model m) {
         this.boardSize = m.getBoardSize();
         this.center = boardSize / 2;
         this.currentPlayer = m.getCurrentPlayer();
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
-        updateStatus(m.getCurrentPlayer());
+        updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         setVisible(true);
     }
 
+    /**
+     * Handles the board update message.
+     *
+     * @param m the model to update
+     */
     private void handleBoardUpdate(Model m) {
         updateBoard(m.getBoardState());
     }
 
+    /**
+     * Handles the center not covered message.
+     *
+     * @param m the model to update
+     */
     private void handleCenterNotCovered(Model m) {
         showMessage("First word must be placed covering the center square.");
         updateBoard(m.getBoardState());
-        updateStatus(m.getCurrentPlayer());
+        updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
     }
 
+    /**
+     * Handles the invalid word message.
+     *
+     * @param m the model to update
+     */
     private void handleInvalidWord(Model m) {
         showMessage("Invalid word! Please try again.");
         updateBoard(m.getBoardState());
-        updateStatus(m.getCurrentPlayer());
+        updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
     }
 
+    /**
+     * Handles the no word found message.
+     *
+     * @param m the model to update
+     */
     private void handleNoWordFound(Model m) {
         showMessage("No new word found! Please try again.");
         updateBoard(m.getBoardState());
 
     }
 
+    /**
+     * Handles the adjacent word message.
+     *
+     * @param m the model to update
+     */
     private void handleAdjacentWord(Model m) {
         showMessage("Word not adjacent! Please try again.");
         updateBoard(m.getBoardState());
 
     }
 
+    /**
+     * Handles the word submitted message.
+     *
+     * @param m the model to update
+     */
     private void handleWordSubmitted(Model m) {
         showMessage("Word accepted! Your score has been updated.");
         updateBoard(m.getBoardState());
-        updateStatus(m.getCurrentPlayer());
+        updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
     }
 
+    /**
+     * Handles the next turn message.
+     *
+     * @param m the model to update
+     */
     private void handleNextTurn(Model m) {
         // hide player tiles
         if (m.getCurrentPlayer().isAi()) {
@@ -347,15 +439,17 @@ public class View extends JFrame implements ModelObserver {
             }
         }
 
-        updateStatus(m.getCurrentPlayer());
+        updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
     }
 
+    /**
+     * Handles the game over message.
+     */
     private void handleGameOver() {
         showMessage("Game Over!");
         setVisible(false);
     }
-
 
 
 }

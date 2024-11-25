@@ -7,7 +7,9 @@ import view.View;
 
 import javax.swing.*;
 
-
+/**
+ * The main class for the Scrabble game.
+ */
 public class Game {
 
     public static void main(String[] args) {
@@ -45,6 +47,10 @@ public class Game {
         while (true) {
             try {
                 numPlayers = Integer.parseInt(JOptionPane.showInputDialog("Enter number of players:"));
+                if (numPlayers < 1) {
+                    JOptionPane.showMessageDialog(null, "Invalid input. Please enter a valid integer greater than 0 for number of players.");
+                    continue;
+                }
                 break;
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Invalid input. Please enter a valid integer for number of players.");
@@ -70,7 +76,7 @@ public class Game {
         model.addObserver(view);
         view.update("initialize", model); // used to initialize variables only the model has.
 
-        // Initialize the controller
+        // Initialize the controller, which will handle user interactions
         new Controller(model, view);
     }
 }

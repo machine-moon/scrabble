@@ -121,6 +121,11 @@ public class Model {
         players.add(player);
     }
 
+    /**
+     * Adds AI players to the game.
+     *
+     * @param numAiPlayers
+     */
     public void addAiPlayers(int numAiPlayers) {
         for (int i = 0; i < numAiPlayers; i++) {
             AiPlayer aiPlayer = new AiPlayer("AI " + (i + 1), getWordList(), this);
@@ -131,9 +136,12 @@ public class Model {
     }
 
     /**
-     * Gets the current player.
+     * Places a tile on the board at the specified position.
      *
-     * @return the current player
+     * @param tile the tile to place
+     * @param row  the row to place the tile
+     * @param col  the column to place the tile
+     * @return true if the tile was placed, false otherwise
      */
     public boolean placeTile(char tile, int row, int col) {
 
@@ -228,6 +236,11 @@ public class Model {
     }
 
 
+    /**
+     * Checks if there are adjacent tiles to the current turn's placements.
+     *
+     * @return true if there are adjacent tiles, false otherwise
+     */
     private boolean hasAdjacentTiles() {
         for (Position pos : currentTurnPlacements.keySet()) {
             int row = pos.row;
@@ -245,7 +258,7 @@ public class Model {
                 return true;
             }
 
-            if (isValidPosition(row, col + 1) && board[row][col + 1] != '\0' &&  !currentTurnPlacements.containsKey(new Position(row, col + 1))) {
+            if (isValidPosition(row, col + 1) && board[row][col + 1] != '\0' && !currentTurnPlacements.containsKey(new Position(row, col + 1))) {
                 return true;
             }
         }
@@ -324,9 +337,15 @@ public class Model {
         return wordlist.contains(word.toLowerCase());
     }
 
+    /**
+     * Gets the word list.
+     *
+     * @return the word list
+     */
     private Set<String> getWordList() {
         return wordlist;
     }
+
     /**
      * Calculates the total score for a list of words.
      *
@@ -468,12 +487,12 @@ public class Model {
     }
 
 
-    // Clear current turn placements (if any)
+    /**
+     * Clears the current turn's placements.
+     */
     private void clearPlacements() {
         currentTurnPlacements.clear();
     }
-
-    // Revert placements if invalid (used for first turn center coverage)
 
     /**
      * Reverts the current turn's placements.
@@ -517,6 +536,10 @@ public class Model {
      * Moves to the next player's turn.
      */
     public void nextTurn() {
+        if (isFirstTurn()) {
+            notifyObservers("firstTurn");
+        }
+
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         notifyObservers("nextTurn");
     }
@@ -528,7 +551,7 @@ public class Model {
      */
     public boolean isGameOver() {
         // Example condition: when the tile bag is empty and a player has no tiles left
-        boolean status = tileBag.isEmpty() && players.stream().anyMatch(player -> player.getTiles().isEmpty());
+        boolean status = tileBag.isEmpty() && players.stream().anyMatch(player -> player.getTiles().size() < 3);
         if (status) {
             notifyObservers("gameOver");
         }
@@ -595,29 +618,61 @@ public class Model {
     public int getBoardSize() {
         return boardSize;
     }
+
+    /**
+     * Gets the triple word score positions.
+     *
+     * @return the triple word score positions
+     */
     public Set<Position> getTripleWordScore() {
         return TRIPLE_WORD_SCORE;
     }
 
+    /**
+     * Gets the double word score positions.
+     *
+     * @return the double word score positions
+     */
     public Set<Position> getDoubleWordScore() {
         return DOUBLE_WORD_SCORE;
     }
 
+    /**
+     * Gets the triple letter score positions.
+     *
+     * @return the triple letter score positions
+     */
     public Set<Position> getTripleLetterScore() {
         return TRIPLE_LETTER_SCORE;
     }
 
+    /**
+     * Gets the double letter score positions.
+     *
+     * @return the double letter score positions
+     */
     public Set<Position> getDoubleLetterScore() {
         return DOUBLE_LETTER_SCORE;
     }
 
-
+    /**
+     * Toggles the display of messages.
+     */
     public void toggleDisplayMessages() {
         this.displayMessages = !(this.displayMessages);
         notifyObservers("toggleMessages");
     }
 
+    /**
+     * Gets the display messages status.
+     *
+     * @return the display messages status
+     */
     public boolean getDisplayMessages() {
         return this.displayMessages;
+    }
+
+    public int getRemainingTiles() {
+        return tileBag.remainingTiles();
     }
 }

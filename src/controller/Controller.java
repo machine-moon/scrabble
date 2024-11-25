@@ -18,6 +18,12 @@ public class Controller {
     private Character selectedPlayerChar;
     private JButton selectedPlayerTileBtn;
 
+    /**
+     * Constructs a Controller with the specified model and view.
+     *
+     * @param m the model
+     * @param v the view
+     */
     public Controller(Model m, View v) {
         model = m;
         view = v;
@@ -48,6 +54,11 @@ public class Controller {
         }
     }
 
+    /**
+     * Handles the event when a player tile is selected.
+     *
+     * @param tileButton the selected player tile button
+     */
     public void onPlayerTileSelected(JButton tileButton) {
         if (selectedPlayerTileBtn != null) {
             selectedPlayerTileBtn.setBackground(null); // Deselect previous tile
@@ -59,6 +70,13 @@ public class Controller {
         tileButton.setBackground(Color.CYAN);
     }
 
+    /**
+     * Handles the event when a board cell is clicked.
+     *
+     * @param row        the row of the board cell
+     * @param col        the column of the board cell
+     * @param cellButton the board cell button
+     */
     public void onBoardCellClicked(int row, int col, JButton cellButton) {
         if (selectedPlayerChar != null) {
             if (model.placeTile(selectedPlayerChar, row, col)) {
@@ -68,13 +86,19 @@ public class Controller {
         }
     }
 
+    /**
+     * Handles the event when the skip turn button is clicked.
+     */
     public void onSkipTurnClicked() {
         model.restorePlayerTiles();
-        model.nextTurn();
         reenablePlayerTiles();
+        model.nextTurn();
         handleAITurn();
     }
 
+    /**
+     * Handles the event when the submit button is clicked.
+     */
     public void onSubmitButtonClicked() {
         if (model.submitWord()) {
             if (model.isFirstTurn() && !model.isCenterCovered()) {
@@ -91,6 +115,9 @@ public class Controller {
         }
     }
 
+    /**
+     * Re-enables the player tiles.
+     */
     private void reenablePlayerTiles() {
         for (JButton tileButton : view.getPlayerTiles()) {
             tileButton.setEnabled(true);
@@ -98,6 +125,9 @@ public class Controller {
         }
     }
 
+    /**
+     * Ends the game and displays the final scores.
+     */
     private void endGame() {
         List<Player> players = model.getPlayers();
         StringBuilder finalScores = new StringBuilder("Game Over! Final Scores:\n");
@@ -107,12 +137,16 @@ public class Controller {
         view.showMessage(finalScores.toString());
     }
 
-
+    /**
+     * Handles the AI player's turn.
+     */
     private void handleAITurn() {
-
-
-        // silence notify observers.
+        if (model.isFirstTurn()) {
+            return;
+        }
+        // silence pop up messages.
         model.toggleDisplayMessages();
+
         while (model.getCurrentPlayer().isAi()) {
             AiPlayer aiPlayer = (AiPlayer) model.getCurrentPlayer();
             if (!(aiPlayer.play())) {
@@ -125,7 +159,8 @@ public class Controller {
                 break;
             }
         }
-        // un silence notify observers.
+
+        // un silence pop up messages.
         model.toggleDisplayMessages();
     }
 }
