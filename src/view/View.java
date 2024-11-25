@@ -100,12 +100,40 @@ public class View extends JFrame implements ModelObserver {
 
     private JButton initializeEachBoardCell(int row, int col) {
         JButton cellButton = new JButton();
-        cellButton.setFont(new Font("Arial", Font.PLAIN, 20));
+        cellButton.setFont(new Font("Arial", Font.PLAIN, 12));
         cellButton.setFocusable(false);
+        cellButton.setOpaque(true);
 
-        // Highlight the center tile
-        cellButton.setBackground((row == center && col == center) ? Color.orange : Color.LIGHT_GRAY);
-        cellButton.setOpaque(row == center && col == center);
+        // Triple Word Score (3×WS) - Red
+        if ((row == 0 && (col == 0 || col == 7 || col == 14)) ||
+                (row == 7 && (col == 0 || col == 14)) ||
+
+                (row == 14 && (col == 0 || col == 7 || col == 14))) {
+            cellButton.setBackground(Color.RED);
+        }
+        // Double Word Score (2×WS) - Pink
+        else if ((row == col && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13)) ||
+                ((row + col == 14) && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13))) {
+            cellButton.setBackground(Color.PINK);
+        }
+        // Triple Letter Score (3×LS) - Blue
+        else if (((row == 1 || row == 13) && (col == 5 || col == 9)) ||
+                ((row == 5 || row == 9) && (col == 1 || col == 13)) ||
+                (row == 5 && col == 5) || (row == 5 && col == 9) ||
+                (row == 9 && col == 5) || (row == 9 && col == 9)) {
+            cellButton.setBackground(Color.BLUE);
+        }
+        // Double Letter Score (2×LS) - Cyan
+        else if (((row == 0 || row == 14) && (col == 3 || col == 11)) ||
+                ((row == 2 || row == 12) && (col == 6 || col == 8)) ||
+                ((row == 3 || row == 11) && (col == 0 || col == 14)) ||
+                ((row == 6 || row == 8) && (col == 2 || col == 12)) ||
+                ((row == 6 || row == 8) && (col == 6 || col == 8))) {
+            cellButton.setBackground(Color.CYAN);
+        }
+        // Center Tile - Orange
+        else if (row == 7 && col == 7) { cellButton.setBackground(Color.ORANGE); }
+        else { cellButton.setBackground(Color.LIGHT_GRAY); }
 
         return cellButton;
     }
@@ -139,8 +167,29 @@ public class View extends JFrame implements ModelObserver {
                 cell.setText(c == '\0' ? "" : String.valueOf(c));
                 // Reapply center tile styling to maintain its special appearance
 
-                cell.setBackground((row == center && col == center) ? Color.orange : Color.LIGHT_GRAY);
-                // also reapply premium tiles styling
+                if ((row == 0 && (col == 0 || col == 7 || col == 14)) ||
+                        (row == 7 && (col == 0 || col == 14)) ||
+                        (row == 14 && (col == 0 || col == 7 || col == 14))) {
+                    cell.setBackground(Color.RED); // Triple Word Score
+                } else if ((row == col && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13)) ||
+                        ((row + col == 14) && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13))) {
+                    cell.setBackground(Color.PINK); // Double Word Score
+                } else if (((row == 1 || row == 13) && (col == 5 || col == 9)) ||
+                        ((row == 5 || row == 9) && (col == 1 || col == 13)) ||
+                        (row == 5 && col == 5) || (row == 5 && col == 9) ||
+                        (row == 9 && col == 5) || (row == 9 && col == 9)) {
+                    cell.setBackground(Color.BLUE); // Triple Letter Score
+                } else if (((row == 0 || row == 14) && (col == 3 || col == 11)) ||
+                        ((row == 2 || row == 12) && (col == 6 || col == 8)) ||
+                        ((row == 3 || row == 11) && (col == 0 || col == 14)) ||
+                        ((row == 6 || row == 8) && (col == 2 || col == 12)) ||
+                        ((row == 6 || row == 8) && (col == 6 || col == 8))) {
+                    cell.setBackground(Color.CYAN); // Double Letter Score
+                } else if (row == 7 && col == 7) {
+                    cell.setBackground(Color.ORANGE); // Center Tile
+                } else {
+                    cell.setBackground(Color.LIGHT_GRAY); // Regular Tile
+                }
 
             }
         }
@@ -288,6 +337,7 @@ public class View extends JFrame implements ModelObserver {
         showMessage("Game Over!");
         setVisible(false);
     }
+
 
 
 }
