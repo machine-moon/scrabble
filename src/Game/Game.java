@@ -16,7 +16,8 @@ public class Game {
         int boardSize;
         while (true) {
             try {
-                boardSize = Integer.parseInt(JOptionPane.showInputDialog("Enter board size:"));
+                //boardSize = Integer.parseInt(JOptionPane.showInputDialog("Enter board size:"));
+                boardSize = 15;
                 // force board size is odd for centerpiece.
                 if (boardSize % 2 == 0) {
                     boardSize += 1;

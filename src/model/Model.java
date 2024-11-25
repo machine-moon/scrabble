@@ -23,6 +23,37 @@ public class Model {
     private boolean isFirstTurn;
     private boolean displayMessages = true; // weather or not to notify observers
 
+    private final Set<Position> TRIPLE_WORD_SCORE = Set.of(
+            new Position(0, 0), new Position(0, 7), new Position(0, 14),
+            new Position(7, 0), new Position(7, 14),
+            new Position(14, 0), new Position(14, 7), new Position(14, 14)
+    );
+
+    private final Set<Position> DOUBLE_WORD_SCORE = Set.of(
+            new Position(1, 1), new Position(2, 2), new Position(3, 3), new Position(4, 4),
+            new Position(10, 10), new Position(11, 11), new Position(12, 12), new Position(13, 13),
+            new Position(1, 13), new Position(2, 12), new Position(3, 11), new Position(4, 10),
+            new Position(10, 4), new Position(11, 3), new Position(12, 2), new Position(13, 1)
+    );
+
+    private final Set<Position> TRIPLE_LETTER_SCORE = Set.of(
+            new Position(1, 5), new Position(1, 9),
+            new Position(5, 1), new Position(5, 5), new Position(5, 9), new Position(5, 13),
+            new Position(9, 1), new Position(9, 5), new Position(9, 9), new Position(9, 13),
+            new Position(13, 5), new Position(13, 9)
+    );
+
+    private final Set<Position> DOUBLE_LETTER_SCORE = Set.of(
+            new Position(0, 3), new Position(0, 11),
+            new Position(2, 6), new Position(2, 8),
+            new Position(3, 0), new Position(3, 14), new Position(3, 11),
+            new Position(6, 2), new Position(6, 6), new Position(6, 8), new Position(6, 12),
+            new Position(8, 2), new Position(8, 6), new Position(8, 8), new Position(8, 12),
+            new Position(11, 0), new Position(11, 3), new Position(11, 11), new Position(11, 14),
+            new Position(12, 6), new Position(12, 8),
+            new Position(14, 3), new Position(14, 11)
+    );
+
 
     /**
      * Initializes the game model with the specified board size.
@@ -151,6 +182,7 @@ public class Model {
 
 
         List<String> newWords = getAllNewWords();
+        System.out.println(newWords);
         if (newWords.isEmpty()) {
             //revertPlacements();  // should this be here? adding it
             restorePlayerTiles();
@@ -213,7 +245,7 @@ public class Model {
                 return true;
             }
 
-            if (isValidPosition(row, col + 1) && board[row][col + 1] != '\0' && !currentTurnPlacements.containsKey(new Position(row, col + 1))) {
+            if (isValidPosition(row, col + 1) && board[row][col + 1] != '\0' &&  !currentTurnPlacements.containsKey(new Position(row, col + 1))) {
                 return true;
             }
         }
@@ -295,7 +327,6 @@ public class Model {
     private Set<String> getWordList() {
         return wordlist;
     }
-
     /**
      * Calculates the total score for a list of words.
      *
@@ -304,9 +335,63 @@ public class Model {
      */
     public int calculateTotalScore(List<String> words) {
         int total = 0;
-        for (String word : words) {
-            total += calculateWordScore(word);
+
+        if (words == null || words.isEmpty()) {
+            return total; // No words formed
         }
+
+        Set<Position> processedPositions = new HashSet<>(); // Track tiles already processed
+
+        for (String word : words) {
+            int wordScore = 0;
+            int wordMultiplier = 1;
+
+            for (Position pos : currentTurnPlacements.keySet()) {
+                if (processedPositions.contains(pos)) {
+                    continue; // Skip already processed positions
+                }
+
+                char tile = currentTurnPlacements.get(pos);
+                int letterScore = getTileScore(tile);
+                int originalLetterScore = letterScore; // Save the original score for comparison
+
+                // Apply premium letter scores
+                String premiumEffect = "None";
+                if (DOUBLE_LETTER_SCORE.contains(pos)) {
+                    letterScore *= 2; // Double Letter Score
+                    premiumEffect = "Double Letter Score (2×LS)";
+                } else if (TRIPLE_LETTER_SCORE.contains(pos)) {
+                    letterScore *= 3; // Triple Letter Score
+                    premiumEffect = "Triple Letter Score (3×LS)";
+                }
+
+                // Print individual tile details
+                System.out.printf("Tile: %c, Position: (%d, %d), Base Score: %d, Premium: %s, Final Letter Score: %d%n",
+                        tile, pos.row, pos.col, originalLetterScore, premiumEffect, letterScore);
+
+                wordScore += letterScore; // Add letter score to the word's total score
+
+                // Apply premium word multipliers
+                if (DOUBLE_WORD_SCORE.contains(pos)) {
+                    wordMultiplier *= 2; // Double Word Score
+                    System.out.printf("Tile: %c at (%d, %d) contributes to Double Word Score (2×WS)%n", tile, pos.row, pos.col);
+                } else if (TRIPLE_WORD_SCORE.contains(pos)) {
+                    wordMultiplier *= 3; // Triple Word Score
+                    System.out.printf("Tile: %c at (%d, %d) contributes to Triple Word Score (3×WS)%n", tile, pos.row, pos.col);
+                }
+
+                // Mark this position as processed
+                processedPositions.add(pos);
+            }
+
+            // Print word-specific details
+            System.out.printf("Word: %s, Word Score Before Multiplier: %d, Word Multiplier: %d, Final Word Score: %d%n",
+                    word, wordScore, wordMultiplier, wordScore * wordMultiplier);
+
+            // Apply the word multiplier to the word's total score
+            total += wordScore * wordMultiplier;
+        }
+
         return total;
     }
 
@@ -510,6 +595,22 @@ public class Model {
     public int getBoardSize() {
         return boardSize;
     }
+    public Set<Position> getTripleWordScore() {
+        return TRIPLE_WORD_SCORE;
+    }
+
+    public Set<Position> getDoubleWordScore() {
+        return DOUBLE_WORD_SCORE;
+    }
+
+    public Set<Position> getTripleLetterScore() {
+        return TRIPLE_LETTER_SCORE;
+    }
+
+    public Set<Position> getDoubleLetterScore() {
+        return DOUBLE_LETTER_SCORE;
+    }
+
 
     public void toggleDisplayMessages() {
         this.displayMessages = !(this.displayMessages);
