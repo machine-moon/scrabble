@@ -67,7 +67,7 @@ public class Model {
         this.currentPlayerIndex = 0;
         this.tileBag = new TileBag();
         this.observers = new ArrayList<>();
-        this.wordlist = loadWordList("src/model/words_alpha.txt");
+        this.wordlist = loadWordList("src/model/wordlist.txt");
         this.currentTurnPlacements = new HashMap<>();
         this.isFirstTurn = true;
     }
