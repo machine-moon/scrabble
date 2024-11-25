@@ -24,6 +24,10 @@ public class Controller {
         selectedPlayerChar = null;
         selectedPlayerTileBtn = null;
 
+        // enable the view to display pop up messages
+        // model.toggleDisplayMessages();
+
+
         // Add action listeners to view components
         view.getSubmitButton().addActionListener(e -> onSubmitButtonClicked());
         view.getSkipTurnButton().addActionListener(e -> onSkipTurnClicked());
@@ -105,24 +109,23 @@ public class Controller {
 
 
     private void handleAITurn() {
+
+
+        // silence notify observers.
+        model.toggleDisplayMessages();
         while (model.getCurrentPlayer().isAi()) {
             AiPlayer aiPlayer = (AiPlayer) model.getCurrentPlayer();
-            boolean moveMade = false;
-            for (int attempt = 1; attempt <= 3; attempt++) {
-                if (aiPlayer.play()) {
-                    moveMade = true;
-                    break;
-                }
+            if (!(aiPlayer.play())) {
+                view.showMessage(aiPlayer.getName() + " skipped their turn.");
             }
-            if (!moveMade) {
-                view.showMessage(aiPlayer.getName() + " skipped their turn after 3 failed attempts.");
-            }
-            model.nextTurn(); // Move to the next player
+            model.nextTurn();
             reenablePlayerTiles();
             if (model.isGameOver()) {
                 endGame();
                 break;
             }
         }
+        // un silence notify observers.
+        model.toggleDisplayMessages();
     }
 }

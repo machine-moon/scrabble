@@ -36,6 +36,7 @@ public class AiPlayer extends Player {
         sortedWords.sort((word1, word2) -> Integer.compare(model.calculateWordScore(word2), model.calculateWordScore(word1)));
 
         // Try to place each word on the board
+
         for (String word : sortedWords) {
             if (tryPlaceWord(model, word)) {
                 if (model.submitWord())
@@ -43,10 +44,12 @@ public class AiPlayer extends Player {
             }
         }
 
+
+
+
         System.out.println(getName() + " could not find a valid move.");
         return false;
     }
-
 
     private Set<String> generateAllCombinations(List<Character> tiles) {
         Set<String> combinations = new HashSet<>();
@@ -81,7 +84,6 @@ public class AiPlayer extends Player {
 
     private boolean tryPlaceWord(Model model, String word) {
         int boardSize = model.getBoardSize();
-        char[][] boardState = model.getBoardState();
         List<int[]> positions = new ArrayList<>();
 
         // Generate all possible positions on the board
@@ -112,14 +114,23 @@ public class AiPlayer extends Player {
 
     private boolean canPlaceWord(Model model, String word, int row, int col, boolean isHorizontal) {
         char[][] boardState = model.getBoardState();
+        boolean hasAdjacent = false;
+
         for (int i = 0; i < word.length(); i++) {
             int currentRow = isHorizontal ? row : row + i;
             int currentCol = isHorizontal ? col + i : col;
             if (currentRow >= boardState.length || currentCol >= boardState[0].length || boardState[currentRow][currentCol] != '\0') {
                 return false;
             }
+            // Check for adjacent tiles
+            if (model.isValidPosition(currentRow - 1, currentCol) && boardState[currentRow - 1][currentCol] != '\0' ||
+                    model.isValidPosition(currentRow + 1, currentCol) && boardState[currentRow + 1][currentCol] != '\0' ||
+                    model.isValidPosition(currentRow, currentCol - 1) && boardState[currentRow][currentCol - 1] != '\0' ||
+                    model.isValidPosition(currentRow, currentCol + 1) && boardState[currentRow][currentCol + 1] != '\0') {
+                hasAdjacent = true;
+            }
         }
-        return true;
+        return hasAdjacent;
     }
 
     private void placeWord(Model model, String word, int row, int col, boolean isHorizontal) {

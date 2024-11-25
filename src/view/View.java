@@ -34,6 +34,8 @@ public class View extends JFrame implements ModelObserver {
     private Player currentPlayer;
     private char[][] board;
 
+    private boolean displayMessages=true;
+
 
     public View(int boardSize) {
         this.boardSize = boardSize;
@@ -185,7 +187,9 @@ public class View extends JFrame implements ModelObserver {
      * @param message the message to display
      */
     public void showMessage(String message) {
-        JOptionPane.showMessageDialog(this, message);
+        if ((displayMessages)) {
+            JOptionPane.showMessageDialog(this, message);
+        }
     }
 
 
@@ -195,6 +199,9 @@ public class View extends JFrame implements ModelObserver {
         switch (message) {
             case "initialize":
                 handleInitialize(m);
+                break;
+            case "toggleMessages":
+                this.displayMessages = m.getDisplayMessages();
                 break;
             case "board":
                 handleBoardUpdate(m);
@@ -280,6 +287,17 @@ public class View extends JFrame implements ModelObserver {
     }
 
     private void handleNextTurn(Model m) {
+        // hide player tiles
+        if (m.getCurrentPlayer().isAi()) {
+            for (JButton tileButton : playerTiles) {
+                tileButton.setVisible(false);
+            }
+        } else {
+            for (JButton tileButton : playerTiles) {
+                tileButton.setVisible(true);
+            }
+        }
+
         updateStatus(m.getCurrentPlayer());
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
     }

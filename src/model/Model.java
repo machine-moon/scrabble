@@ -21,6 +21,7 @@ public class Model {
     private final int boardSize;
     private final Map<Position, Character> currentTurnPlacements;
     private boolean isFirstTurn;
+    private boolean displayMessages = true; // weather or not to notify observers
 
 
     /**
@@ -510,5 +511,12 @@ public class Model {
         return boardSize;
     }
 
+    public void toggleDisplayMessages() {
+        this.displayMessages = !(this.displayMessages);
+        notifyObservers("toggleMessages");
+    }
 
+    public boolean getDisplayMessages() {
+        return this.displayMessages;
+    }
 }
