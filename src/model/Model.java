@@ -210,27 +210,31 @@ public class Model {
 
         // All words are valid, calculate total score
         int totalScore = calculateTotalScore(newWords);
+
+
         getCurrentPlayer().addScore(totalScore);
 
         // After validation, replenish player's tiles
         getCurrentPlayer().replenishTiles(tileBag);
 
-        // Clear current turn placements
-        clearPlacements();
 
         // Check if this was the first turn and validate center coverage
         if (isFirstTurn) {
             if (!coversCenter()) {
                 // Invalid first move; revert placements
+
                 revertPlacements();
                 getCurrentPlayer().deductScore(totalScore);
                 restorePlayerTiles();
+                clearPlacements();
                 notifyObservers("centerNotCovered");
                 return false;
             }
             isFirstTurn = false; // First turn completed
         }
 
+        // Clear current turn placements
+        clearPlacements();
         notifyObservers("wordSubmitted");
         return true;
     }
