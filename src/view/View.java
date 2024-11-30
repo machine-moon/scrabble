@@ -30,6 +30,8 @@ public class View extends JFrame implements ModelObserver {
     private JButton selectedTileButton; //del this?
     private JButton submitButton;
     private JButton skipTurnButton;
+    private JButton undoButton;
+    private JButton redoButton;
 
     private JButton saveButton;
     private JButton loadButton;
@@ -113,11 +115,26 @@ public class View extends JFrame implements ModelObserver {
         // Selected tile button
         selectedTileButton = null;
 
+        // Right Panel
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new GridLayout(3, 1));
+        add(rightPanel, BorderLayout.EAST);
+
         // Submit button
         submitButton = new JButton("Submit");
-        add(submitButton, BorderLayout.EAST);
+        rightPanel.add(submitButton);
 
+        // Undo button
+        undoButton = new JButton("Undo");
+        rightPanel.add(undoButton);
 
+        // Redo button
+        redoButton = new JButton("Redo");
+        rightPanel.add(redoButton);
+
+        // --------------------------------------
+
+        // Left Panel
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new GridLayout(3, 1));
         add(leftPanel, BorderLayout.WEST);
@@ -133,6 +150,7 @@ public class View extends JFrame implements ModelObserver {
         // Load Button
         loadButton = new JButton("Load Game");
         leftPanel.add(loadButton);
+
 
 
         // The game isn't actually ready till the controller says so, via the update() method
@@ -246,6 +264,24 @@ public class View extends JFrame implements ModelObserver {
      */
     public JButton getSkipTurnButton() {
         return skipTurnButton;
+    }
+
+    /**
+     * Returns the undo button
+     *
+     * @return the undo button
+     */
+    public JButton getUndoButton() {
+        return undoButton;
+    }
+
+    /**
+     * Returns the redo button
+     *
+     * @return the redo button
+     */
+    public JButton getRedoButton() {
+        return redoButton;
     }
 
     /**
