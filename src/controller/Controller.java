@@ -37,6 +37,8 @@ public class Controller {
         // Add action listeners to view components
         view.getSubmitButton().addActionListener(e -> onSubmitButtonClicked());
         view.getSkipTurnButton().addActionListener(e -> onSkipTurnClicked());
+        view.getUndoButton().addActionListener(e -> onUndoButtonClicked());
+        view.getRedoButton().addActionListener(e -> onRedoButtonClicked());
 
         // Loop through each cell button in the board and add action listener to each board cell button
         for (int row = 0; row < model.getBoardSize(); row++) {
@@ -113,6 +115,20 @@ public class Controller {
                 }
             }
         }
+    }
+
+    /**
+     * Handles the event when the undo button is clicked.
+     */
+    public void onUndoButtonClicked() {
+        // function to be coded in
+    }
+
+    /**
+     * Handles the event when the redo button is clicked.
+     */
+    public void onRedoButtonClicked() {
+        // function to be coded in
     }
 
     /**

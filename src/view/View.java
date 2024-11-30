@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class View extends JFrame implements ModelObserver {
     private JPanel boardPanel;
+    private JPanel buttonPanel1;
+    private JPanel buttonPanel2;
     private JPanel tileRackPanel;
     private JLabel statusLabel;
     private List<JButton> playerTiles;
@@ -25,6 +27,8 @@ public class View extends JFrame implements ModelObserver {
     private JButton selectedTileButton; //del this?
     private JButton submitButton;
     private JButton skipTurnButton;
+    private JButton undoButton;
+    private JButton redoButton;
 
 
     // stuff the update() method will update.
@@ -97,14 +101,31 @@ public class View extends JFrame implements ModelObserver {
         // Selected tile button
         selectedTileButton = null;
 
+        buttonPanel1 = new JPanel();
+        add(buttonPanel1, BorderLayout.EAST);
+        buttonPanel1.setLayout(new GridLayout(2, 1));
+
+        buttonPanel2 = new JPanel();
+        add(buttonPanel2, BorderLayout.WEST);
+        buttonPanel2.setLayout(new GridLayout(2, 1));
+
         // Submit button
         submitButton = new JButton("Submit");
 
         // Skip turn button
         skipTurnButton = new JButton("Skip Turn");
 
-        add(submitButton, BorderLayout.EAST);
-        add(skipTurnButton, BorderLayout.WEST);
+        // Undo button
+        undoButton = new JButton("Undo");
+
+        // Redo button
+        redoButton = new JButton("Redo");
+
+        buttonPanel1.add(submitButton);
+        buttonPanel1.add(skipTurnButton);
+
+        buttonPanel2.add(undoButton);
+        buttonPanel2.add(redoButton);
 
         // The game isn't actually ready till the controller says so, via the update() method
         setVisible(false);
@@ -200,6 +221,18 @@ public class View extends JFrame implements ModelObserver {
     public JButton getSkipTurnButton() {
         return skipTurnButton;
     }
+
+    /** Returns the undo button
+     *
+     * @return the undo button
+     */
+    public JButton getUndoButton() {return undoButton;}
+
+    /** Returns the redo button
+     *
+     * @return the redo button
+     */
+    public JButton getRedoButton() {return redoButton;}
 
     /**
      * Updates the game board with the given board state.
