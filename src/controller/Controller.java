@@ -4,6 +4,7 @@ import model.AiPlayer;
 import model.Model;
 import model.Player;
 import view.View;
+import model.Position;
 
 import javax.swing.*;
 import java.awt.*;
@@ -121,7 +122,12 @@ public class Controller {
      * Handles the event when the undo button is clicked.
      */
     public void onUndoButtonClicked() {
-        // function to be coded in
+        Player currentPlayer = model.getCurrentPlayer();
+        Position lastPositionPlayed = currentPlayer.history.removeLast();
+        Character lastTilePlayed = model.removeCurrentPlacementTile(lastPositionPlayed);
+        currentPlayer.undoHistory.add(lastPositionPlayed);
+        model.removeTileFromBoard(lastPositionPlayed.row, lastPositionPlayed.col);
+        currentPlayer.addTile(lastTilePlayed);
     }
 
     /**
@@ -129,6 +135,7 @@ public class Controller {
      */
     public void onRedoButtonClicked() {
         // function to be coded in
+
     }
 
     /**

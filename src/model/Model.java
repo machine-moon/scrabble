@@ -161,6 +161,7 @@ public class Model {
         }
 
         board[row][col] = tile;
+        getCurrentPlayer().history.add(new Position(row, col));
         currentTurnPlacements.put(new Position(row, col), tile);
         getCurrentPlayer().removeTile(tile);
         notifyObservers("tilePlaced");
@@ -546,6 +547,8 @@ public class Model {
         }
 
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+        getCurrentPlayer().undoHistory.clear();
+        getCurrentPlayer().history.clear();
         notifyObservers("nextTurn");
     }
 
@@ -680,4 +683,15 @@ public class Model {
     public int getRemainingTiles() {
         return tileBag.remainingTiles();
     }
+
+    public Character removeCurrentPlacementTile(Position position){
+        return currentTurnPlacements.remove(position);
+    }
+
+    public void removeTileFromBoard(int row, int col) {
+        board[row][col] = '\0';
+        notifyObservers("board");
+    }
+
+
 }
