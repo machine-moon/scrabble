@@ -10,6 +10,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * The View class represents the GUI of the Scrabble game.
  * It is responsible for displaying the game board, tile rack, and status messages to the user.
@@ -26,6 +27,8 @@ public class View extends JFrame implements ModelObserver {
     private JButton submitButton;
     private JButton skipTurnButton;
 
+    private JButton saveButton;
+    private JButton loadButton;
 
     // stuff the update() method will update.
     private int boardSize; // init update method
@@ -73,8 +76,6 @@ public class View extends JFrame implements ModelObserver {
         }
 
 
-        add(boardPanel, BorderLayout.CENTER);
-
         // Tile rack panel
         tileRackPanel = new JPanel(new FlowLayout());
         add(tileRackPanel, BorderLayout.SOUTH);
@@ -99,12 +100,25 @@ public class View extends JFrame implements ModelObserver {
 
         // Submit button
         submitButton = new JButton("Submit");
+        add(submitButton, BorderLayout.EAST);
+
+
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new GridLayout(3, 1));
+        add(leftPanel, BorderLayout.WEST);
 
         // Skip turn button
         skipTurnButton = new JButton("Skip Turn");
+        leftPanel.add(skipTurnButton);
 
-        add(submitButton, BorderLayout.EAST);
-        add(skipTurnButton, BorderLayout.WEST);
+        // Save Button
+        saveButton = new JButton("Save Game");
+        leftPanel.add(saveButton);
+
+        // Load Button
+        loadButton = new JButton("Load Game");
+        leftPanel.add(loadButton);
+
 
         // The game isn't actually ready till the controller says so, via the update() method
         setVisible(false);
@@ -160,6 +174,24 @@ public class View extends JFrame implements ModelObserver {
         }
 
         return cellButton;
+    }
+
+    /**
+     * Returns the save button.
+     *
+     * @return the save button
+     */
+    public JButton getSaveButton() {
+        return saveButton;
+    }
+
+    /**
+     * Returns the load button.
+     *
+     * @return the load button
+     */
+    public JButton getLoadButton() {
+        return loadButton;
     }
 
     /**
@@ -352,7 +384,9 @@ public class View extends JFrame implements ModelObserver {
         this.currentPlayer = m.getCurrentPlayer();
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
         updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
+        updateBoard(m.getBoardState());
         setVisible(true);
+
     }
 
     /**

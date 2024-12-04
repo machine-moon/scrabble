@@ -7,6 +7,7 @@ import view.View;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -33,6 +34,8 @@ public class Controller {
         // enable the view to display pop up messages
         // model.toggleDisplayMessages();
 
+        view.getSaveButton().addActionListener(e -> onSaveButtonClicked());
+        view.getLoadButton().addActionListener(e -> onLoadButtonClicked());
 
         // Add action listeners to view components
         view.getSubmitButton().addActionListener(e -> onSubmitButtonClicked());
@@ -53,6 +56,37 @@ public class Controller {
             tileButton.addActionListener(e -> onPlayerTileSelected(tileButton));
         }
     }
+
+    /**
+     * Handles the event when the save button is clicked.
+     */
+    private void onSaveButtonClicked() {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("game_save.ser"))) {
+            out.writeObject(model);
+            view.showMessage("Game saved successfully!");
+        } catch (IOException e) {
+            view.showMessage("Error saving game: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Handles the event when the load button is clicked.
+     */
+    private void onLoadButtonClicked() {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("game_save.ser"))) {
+            model = (Model) in.readObject();
+            model.addObserver(view); // Reattach the view as an observer
+            view.update("initialize", model);
+            view.showMessage("Game loaded successfully!");
+        } catch (FileNotFoundException e) {
+            view.showMessage("Save file not found. Please ensure the save file exists.");
+        } catch (InvalidClassException | StreamCorruptedException e) {
+            view.showMessage("Save file is corrupted or incompatible. Please try saving the game again.");
+        } catch (IOException | ClassNotFoundException e) {
+            view.showMessage("Error loading game: " + e.getMessage());
+        }
+    }
+
 
     /**
      * Handles the event when a player tile is selected.

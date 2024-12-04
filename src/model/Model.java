@@ -1,22 +1,23 @@
 package model;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 
 /**
  * Represents the game model.
  */
-public class Model {
+public class Model implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private static Model instance;
 
     private final char[][] board;
     private final List<Player> players;
     private int currentPlayerIndex;
     private final TileBag tileBag;
-    private final List<ModelObserver> observers;
+    private transient List<ModelObserver> observers; // Marked as transient
     private final Set<String> wordlist;
     private final int boardSize;
     private final Map<Position, Character> currentTurnPlacements;
@@ -70,6 +71,18 @@ public class Model {
         this.wordlist = loadWordList("src/model/wordlist.txt");
         this.currentTurnPlacements = new HashMap<>();
         this.isFirstTurn = true;
+    }
+
+    /**
+     * Custom serialization logic for transient field observers.
+     *
+     * @param in the input stream
+     * @throws IOException if an I/O error occurs
+     */
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        this.observers = new ArrayList<>(); // Reinitialize transient field
     }
 
     /**
@@ -230,8 +243,6 @@ public class Model {
 
         // After validation, replenish player's tiles
         getCurrentPlayer().replenishTiles(tileBag);
-
-
 
 
         // Clear current turn placements

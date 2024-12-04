@@ -1,13 +1,14 @@
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Represents a player in the game.
  */
-public class Player {
-
+public class Player implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String name;
     private int score;
     public List<Character> tiles;
