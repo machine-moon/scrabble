@@ -177,6 +177,7 @@ public class Model implements Serializable {
         if (!isFirstTurn && !hasAdjacentTiles()) {
             restorePlayerTiles(); // Undo invalid move
             notifyObservers("noAdjacentTiles");
+            System.out.println("No adjacent tiles");
             return false;
         }
 
@@ -187,6 +188,7 @@ public class Model implements Serializable {
             //revertPlacements();  // should this be here? adding it
             restorePlayerTiles();
             notifyObservers("noWordFound");
+            System.out.println("No words found");
             return false; // No tiles placed
         }
 
@@ -196,6 +198,7 @@ public class Model implements Serializable {
                 //revertPlacements();  // should this be here? adding it
                 restorePlayerTiles();
                 notifyObservers("invalidWord");
+                System.out.println("Invalid word: " + word);
                 return false; // At least one word is invalid
             }
         }
@@ -209,6 +212,8 @@ public class Model implements Serializable {
                 restorePlayerTiles();
                 clearPlacements();
                 notifyObservers("centerNotCovered");
+                System.out.println("Center not covered");
+
                 return false;
             }
             isFirstTurn = false; // First turn completed
