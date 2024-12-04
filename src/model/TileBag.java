@@ -1,5 +1,6 @@
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +11,8 @@ import java.util.List;
  * The number of each tile is based on the official Scrabble tile distribution.
  * The bag is shuffled at the start of the game to randomize the draw order.
  */
-public class TileBag {
+public class TileBag implements Serializable {
+    private static final long serialVersionUID = 1L;
     private List<Character> tiles;
 
     public TileBag() {

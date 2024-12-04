@@ -10,6 +10,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * The View class represents the GUI of the Scrabble game.
  * It is responsible for displaying the game board, tile rack, and status messages to the user.
@@ -17,10 +18,12 @@ import java.util.List;
  */
 public class View extends JFrame implements ModelObserver {
     private JPanel boardPanel;
-    private JPanel buttonPanel1;
-    private JPanel buttonPanel2;
     private JPanel tileRackPanel;
     private JLabel statusLabel;
+    private JLabel timerLabel;
+    private JPanel statusPanel;
+
+
     private List<JButton> playerTiles;
 
 
@@ -30,6 +33,8 @@ public class View extends JFrame implements ModelObserver {
     private JButton undoButton;
     private JButton redoButton;
 
+    private JButton saveButton;
+    private JButton loadButton;
 
     // stuff the update() method will update.
     private int boardSize; // init update method
@@ -77,16 +82,25 @@ public class View extends JFrame implements ModelObserver {
         }
 
 
-        add(boardPanel, BorderLayout.CENTER);
-
         // Tile rack panel
         tileRackPanel = new JPanel(new FlowLayout());
         add(tileRackPanel, BorderLayout.SOUTH);
 
+
         // Status label
         statusLabel = new JLabel("Welcome to Scrabble!");
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        add(statusLabel, BorderLayout.NORTH);
+
+        // Timer label
+        timerLabel = new JLabel();
+        timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Status panel
+        statusPanel = new JPanel(new GridLayout(2, 1));
+        statusPanel.add(statusLabel);
+        statusPanel.add(timerLabel);
+        add(statusPanel, BorderLayout.NORTH);
+
 
         // Tile buttons
         playerTiles = new ArrayList<>();
@@ -101,31 +115,43 @@ public class View extends JFrame implements ModelObserver {
         // Selected tile button
         selectedTileButton = null;
 
-        buttonPanel1 = new JPanel();
-        add(buttonPanel1, BorderLayout.EAST);
-        buttonPanel1.setLayout(new GridLayout(2, 1));
-
-        buttonPanel2 = new JPanel();
-        add(buttonPanel2, BorderLayout.WEST);
-        buttonPanel2.setLayout(new GridLayout(2, 1));
+        // Right Panel
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new GridLayout(3, 1));
+        add(rightPanel, BorderLayout.EAST);
 
         // Submit button
         submitButton = new JButton("Submit");
-
-        // Skip turn button
-        skipTurnButton = new JButton("Skip Turn");
+        rightPanel.add(submitButton);
 
         // Undo button
         undoButton = new JButton("Undo");
+        rightPanel.add(undoButton);
 
         // Redo button
         redoButton = new JButton("Redo");
+        rightPanel.add(redoButton);
 
-        buttonPanel1.add(submitButton);
-        buttonPanel1.add(skipTurnButton);
+        // --------------------------------------
 
-        buttonPanel2.add(undoButton);
-        buttonPanel2.add(redoButton);
+        // Left Panel
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new GridLayout(3, 1));
+        add(leftPanel, BorderLayout.WEST);
+
+        // Skip turn button
+        skipTurnButton = new JButton("Skip Turn");
+        leftPanel.add(skipTurnButton);
+
+        // Save Button
+        saveButton = new JButton("Save Game");
+        leftPanel.add(saveButton);
+
+        // Load Button
+        loadButton = new JButton("Load Game");
+        leftPanel.add(loadButton);
+
+
 
         // The game isn't actually ready till the controller says so, via the update() method
         setVisible(false);
@@ -184,6 +210,24 @@ public class View extends JFrame implements ModelObserver {
     }
 
     /**
+     * Returns the save button.
+     *
+     * @return the save button
+     */
+    public JButton getSaveButton() {
+        return saveButton;
+    }
+
+    /**
+     * Returns the load button.
+     *
+     * @return the load button
+     */
+    public JButton getLoadButton() {
+        return loadButton;
+    }
+
+    /**
      * Returns the list of player tiles.
      *
      * @return the list of player tiles
@@ -222,17 +266,23 @@ public class View extends JFrame implements ModelObserver {
         return skipTurnButton;
     }
 
-    /** Returns the undo button
+    /**
+     * Returns the undo button
      *
      * @return the undo button
      */
-    public JButton getUndoButton() {return undoButton;}
+    public JButton getUndoButton() {
+        return undoButton;
+    }
 
-    /** Returns the redo button
+    /**
+     * Returns the redo button
      *
      * @return the redo button
      */
-    public JButton getRedoButton() {return redoButton;}
+    public JButton getRedoButton() {
+        return redoButton;
+    }
 
     /**
      * Updates the game board with the given board state.
@@ -369,9 +419,24 @@ public class View extends JFrame implements ModelObserver {
             case "gameOver":
                 handleGameOver();
                 break;
+            case "resetTimer":
+                handleResetTimer();
+                break;
+            case "timerModeChanged":
+                handleTimerModeChanged(m);
+                break;
             default:
                 break;
         }
+    }
+
+
+    private void handleResetTimer() {
+        timerLabel.setText("Timer: 30s");
+    }
+
+    private void handleTimerModeChanged(Model m) {
+        timerLabel.setVisible(m.isTimerMode());
     }
 
     /**
@@ -385,7 +450,9 @@ public class View extends JFrame implements ModelObserver {
         this.currentPlayer = m.getCurrentPlayer();
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
         updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
+        updateBoard(m.getBoardState());
         setVisible(true);
+
     }
 
     /**
@@ -484,5 +551,24 @@ public class View extends JFrame implements ModelObserver {
         setVisible(false);
     }
 
+    /**
+     * Returns the selected tile button.
+     *
+     * @return the selected tile button
+     */
+    public JLabel getTimerLabel() {
+        return timerLabel;
+    }
 
+    /**
+     * Enables a player tile
+     */
+    public void enableTile(Character c){
+        for(JButton button: playerTiles){
+            if (button.getText().equals(c.toString()) && !button.isEnabled()){
+                button.setEnabled(true);
+                button.setBackground(Color.CYAN);
+            }
+        }
+    }
 }

@@ -45,11 +45,11 @@ public class AiPlayer extends Player {
             tiles.removeLast();
         }
 
-        System.out.println("Tiles: " + tiles);
+        //System.out.println("Tiles: " + tiles);
         Set<String> possibleWords = generateAllCombinations(tiles);
         Set<String> validWords = filterValidWords(possibleWords);
 
-        System.out.println("Valid words: " + validWords);
+        //System.out.println("Valid words: " + validWords);
 
         // Calculate scores for each valid word
         List<String> sortedWords = new ArrayList<>(validWords);
@@ -65,7 +65,7 @@ public class AiPlayer extends Player {
         }
 
 
-        System.out.println(getName() + " could not find a valid move.");
+        //System.out.println(getName() + " could not find a valid move.");
         return false;
     }
 
