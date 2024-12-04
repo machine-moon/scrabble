@@ -174,6 +174,7 @@ public class Controller {
         currentPlayer.undoHistory.add(lastPositionPlayed);
         model.removeTileFromBoard(lastPositionPlayed.row, lastPositionPlayed.col);
         currentPlayer.addTile(lastTilePlayed);
+        view.enableTile(lastTilePlayed);
     }
 
     /**

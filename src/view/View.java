@@ -559,4 +559,16 @@ public class View extends JFrame implements ModelObserver {
     public JLabel getTimerLabel() {
         return timerLabel;
     }
+
+    /**
+     * Enables a player tile
+     */
+    public void enableTile(Character c){
+        for(JButton button: playerTiles){
+            if (button.getText().equals(c.toString()) && !button.isEnabled()){
+                button.setEnabled(true);
+                button.setBackground(Color.CYAN);
+            }
+        }
+    }
 }
