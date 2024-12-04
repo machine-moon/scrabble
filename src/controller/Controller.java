@@ -181,8 +181,12 @@ public class Controller {
      * Handles the event when the redo button is clicked.
      */
     public void onRedoButtonClicked() {
-        // function to be coded in
-
+        Player currentPlayer = model.getCurrentPlayer();
+        Position lastUndoPosition = currentPlayer.undoHistory.removeLast();
+        Character lastUndoTile = currentPlayer.tiles.removeLast();
+        currentPlayer.history.add(lastUndoPosition);
+        model.addTileToBoard(lastUndoTile, lastUndoPosition.row, lastUndoPosition.col);
+        view.disableTile(lastUndoTile);
     }
 
     /**

@@ -567,7 +567,19 @@ public class View extends JFrame implements ModelObserver {
         for(JButton button: playerTiles){
             if (button.getText().equals(c.toString()) && !button.isEnabled()){
                 button.setEnabled(true);
-                button.setBackground(Color.CYAN);
+                button.setBackground(Color.cyan);
+            }
+        }
+    }
+
+    /**
+     * Disables a player tile
+     */
+    public void disableTile(Character c){
+        for(JButton button: playerTiles){
+            if (button.getText().equals(c.toString()) && button.isEnabled()){
+                button.setEnabled(false);
+                button.setBackground(Color.cyan);
             }
         }
     }
