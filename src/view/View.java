@@ -20,6 +20,10 @@ public class View extends JFrame implements ModelObserver {
     private JPanel boardPanel;
     private JPanel tileRackPanel;
     private JLabel statusLabel;
+    private JLabel timerLabel;
+    private JPanel statusPanel;
+
+
     private List<JButton> playerTiles;
 
 
@@ -80,10 +84,21 @@ public class View extends JFrame implements ModelObserver {
         tileRackPanel = new JPanel(new FlowLayout());
         add(tileRackPanel, BorderLayout.SOUTH);
 
+
         // Status label
         statusLabel = new JLabel("Welcome to Scrabble!");
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        add(statusLabel, BorderLayout.NORTH);
+
+        // Timer label
+        timerLabel = new JLabel();
+        timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Status panel
+        statusPanel = new JPanel(new GridLayout(2, 1));
+        statusPanel.add(statusLabel);
+        statusPanel.add(timerLabel);
+        add(statusPanel, BorderLayout.NORTH);
+
 
         // Tile buttons
         playerTiles = new ArrayList<>();
@@ -368,9 +383,24 @@ public class View extends JFrame implements ModelObserver {
             case "gameOver":
                 handleGameOver();
                 break;
+            case "resetTimer":
+                handleResetTimer();
+                break;
+            case "timerModeChanged":
+                handleTimerModeChanged(m);
+                break;
             default:
                 break;
         }
+    }
+
+
+    private void handleResetTimer() {
+        timerLabel.setText("Timer: 30s");
+    }
+
+    private void handleTimerModeChanged(Model m) {
+        timerLabel.setVisible(m.isTimerMode());
     }
 
     /**
@@ -485,5 +515,12 @@ public class View extends JFrame implements ModelObserver {
         setVisible(false);
     }
 
-
+    /**
+     * Returns the selected tile button.
+     *
+     * @return the selected tile button
+     */
+    public JLabel getTimerLabel() {
+        return timerLabel;
+    }
 }

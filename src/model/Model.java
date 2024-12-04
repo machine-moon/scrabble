@@ -22,38 +22,17 @@ public class Model implements Serializable {
     private final int boardSize;
     private final Map<Position, Character> currentTurnPlacements;
     private boolean isFirstTurn;
-    private boolean displayMessages = true; // weather or not to notify observers
+    private boolean displayMessages = true; // whether to notify observers
+    private boolean timerMode;
 
-    private final Set<Position> TRIPLE_WORD_SCORE = Set.of(
-            new Position(0, 0), new Position(0, 7), new Position(0, 14),
-            new Position(7, 0), new Position(7, 14),
-            new Position(14, 0), new Position(14, 7), new Position(14, 14)
-    );
 
-    private final Set<Position> DOUBLE_WORD_SCORE = Set.of(
-            new Position(1, 1), new Position(2, 2), new Position(3, 3), new Position(4, 4),
-            new Position(10, 10), new Position(11, 11), new Position(12, 12), new Position(13, 13),
-            new Position(1, 13), new Position(2, 12), new Position(3, 11), new Position(4, 10),
-            new Position(10, 4), new Position(11, 3), new Position(12, 2), new Position(13, 1)
-    );
+    private final Set<Position> TRIPLE_WORD_SCORE = Set.of(new Position(0, 0), new Position(0, 7), new Position(0, 14), new Position(7, 0), new Position(7, 14), new Position(14, 0), new Position(14, 7), new Position(14, 14));
 
-    private final Set<Position> TRIPLE_LETTER_SCORE = Set.of(
-            new Position(1, 5), new Position(1, 9),
-            new Position(5, 1), new Position(5, 5), new Position(5, 9), new Position(5, 13),
-            new Position(9, 1), new Position(9, 5), new Position(9, 9), new Position(9, 13),
-            new Position(13, 5), new Position(13, 9)
-    );
+    private final Set<Position> DOUBLE_WORD_SCORE = Set.of(new Position(1, 1), new Position(2, 2), new Position(3, 3), new Position(4, 4), new Position(10, 10), new Position(11, 11), new Position(12, 12), new Position(13, 13), new Position(1, 13), new Position(2, 12), new Position(3, 11), new Position(4, 10), new Position(10, 4), new Position(11, 3), new Position(12, 2), new Position(13, 1));
 
-    private final Set<Position> DOUBLE_LETTER_SCORE = Set.of(
-            new Position(0, 3), new Position(0, 11),
-            new Position(2, 6), new Position(2, 8),
-            new Position(3, 0), new Position(3, 14), new Position(3, 11),
-            new Position(6, 2), new Position(6, 6), new Position(6, 8), new Position(6, 12),
-            new Position(8, 2), new Position(8, 6), new Position(8, 8), new Position(8, 12),
-            new Position(11, 0), new Position(11, 3), new Position(11, 11), new Position(11, 14),
-            new Position(12, 6), new Position(12, 8),
-            new Position(14, 3), new Position(14, 11)
-    );
+    private final Set<Position> TRIPLE_LETTER_SCORE = Set.of(new Position(1, 5), new Position(1, 9), new Position(5, 1), new Position(5, 5), new Position(5, 9), new Position(5, 13), new Position(9, 1), new Position(9, 5), new Position(9, 9), new Position(9, 13), new Position(13, 5), new Position(13, 9));
+
+    private final Set<Position> DOUBLE_LETTER_SCORE = Set.of(new Position(0, 3), new Position(0, 11), new Position(2, 6), new Position(2, 8), new Position(3, 0), new Position(3, 14), new Position(3, 11), new Position(6, 2), new Position(6, 6), new Position(6, 8), new Position(6, 12), new Position(8, 2), new Position(8, 6), new Position(8, 8), new Position(8, 12), new Position(11, 0), new Position(11, 3), new Position(11, 11), new Position(11, 14), new Position(12, 6), new Position(12, 8), new Position(14, 3), new Position(14, 11));
 
 
     /**
@@ -203,7 +182,7 @@ public class Model implements Serializable {
 
 
         List<String> newWords = getAllNewWords();
-        System.out.println(newWords);
+        //System.out.println(newWords);
         if (newWords.isEmpty()) {
             //revertPlacements();  // should this be here? adding it
             restorePlayerTiles();
@@ -401,8 +380,7 @@ public class Model implements Serializable {
                 }
 
                 // Print individual tile details
-                System.out.printf("Tile: %c, Position: (%d, %d), Base Score: %d, Premium: %s, Final Letter Score: %d%n",
-                        tile, pos.row, pos.col, originalLetterScore, premiumEffect, letterScore);
+                System.out.printf("Tile: %c, Position: (%d, %d), Base Score: %d, Premium: %s, Final Letter Score: %d%n", tile, pos.row, pos.col, originalLetterScore, premiumEffect, letterScore);
 
                 wordScore += letterScore; // Add letter score to the word's total score
 
@@ -420,8 +398,7 @@ public class Model implements Serializable {
             }
 
             // Print word-specific details
-            System.out.printf("Word: %s, Word Score Before Multiplier: %d, Word Multiplier: %d, Final Word Score: %d%n",
-                    word, wordScore, wordMultiplier, wordScore * wordMultiplier);
+            System.out.printf("Word: %s, Word Score Before Multiplier: %d, Word Multiplier: %d, Final Word Score: %d%n", word, wordScore, wordMultiplier, wordScore * wordMultiplier);
 
             // Apply the word multiplier to the word's total score
             total += wordScore * wordMultiplier;
@@ -688,7 +665,39 @@ public class Model implements Serializable {
         return this.displayMessages;
     }
 
+    /**
+     * Gets the remaining tiles in the tile bag.
+     *
+     * @return the number of remaining tiles
+     */
     public int getRemainingTiles() {
         return tileBag.remainingTiles();
     }
+
+    /**
+     * Sets the timer mode.
+     *
+     * @param timerMode the timer mode to set
+     */
+    public void setTimerMode(boolean timerMode) {
+        this.timerMode = timerMode;
+        notifyObservers("timerModeChanged");
+    }
+
+    /**
+     * Gets the timer mode.
+     *
+     * @return the timer mode
+     */
+    public boolean isTimerMode() {
+        return timerMode;
+    }
+
+    /**
+     * Resets the timer.
+     */
+    public void resetTimer() {
+        notifyObservers("resetTimer");
+    }
+
 }

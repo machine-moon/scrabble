@@ -9,6 +9,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * The Controller class handles the game logic and user interactions.
@@ -18,6 +20,7 @@ public class Controller {
     private View view;
     private Character selectedPlayerChar;
     private JButton selectedPlayerTileBtn;
+    private TimerTask timerTask;
 
     /**
      * Constructs a Controller with the specified model and view.
@@ -31,13 +34,10 @@ public class Controller {
         selectedPlayerChar = null;
         selectedPlayerTileBtn = null;
 
-        // enable the view to display pop up messages
-        // model.toggleDisplayMessages();
-
-        view.getSaveButton().addActionListener(e -> onSaveButtonClicked());
-        view.getLoadButton().addActionListener(e -> onLoadButtonClicked());
 
         // Add action listeners to view components
+        view.getSaveButton().addActionListener(e -> onSaveButtonClicked());
+        view.getLoadButton().addActionListener(e -> onLoadButtonClicked());
         view.getSubmitButton().addActionListener(e -> onSubmitButtonClicked());
         view.getSkipTurnButton().addActionListener(e -> onSkipTurnClicked());
 
@@ -53,7 +53,11 @@ public class Controller {
 
         // Add action listeners to player tile rack buttons
         for (JButton tileButton : view.getPlayerTiles()) {
-            tileButton.addActionListener(e -> onPlayerTileSelected(tileButton));
+            tileButton.addActionListener(e -> onPlayerTileSelected((JButton) e.getSource()));
+        }
+
+        if (model.isTimerMode()) {
+            startTimer();
         }
     }
 
@@ -114,6 +118,8 @@ public class Controller {
     public void onBoardCellClicked(int row, int col, JButton cellButton) {
         if (selectedPlayerChar != null) {
             if (model.placeTile(selectedPlayerChar, row, col)) {
+                selectedPlayerTileBtn.setBackground(Color.GRAY); // unhighlight the selected tile
+                selectedPlayerTileBtn.setEnabled(false); // disable the selected tile
                 selectedPlayerChar = null;
                 selectedPlayerTileBtn = null;
             }
@@ -128,6 +134,9 @@ public class Controller {
         reenablePlayerTiles();
         model.nextTurn();
         handleAITurn();
+        if (model.isTimerMode()) {
+            resetTimer();
+        }
     }
 
     /**
@@ -145,6 +154,9 @@ public class Controller {
                 } else {
                     handleAITurn();
                 }
+            }
+            if (model.isTimerMode()) {
+                resetTimer();
             }
         }
     }
@@ -196,5 +208,35 @@ public class Controller {
 
         // un silence pop up messages.
         model.toggleDisplayMessages();
+    }
+
+
+    private void startTimer() {
+        Timer timer = new Timer();
+        timerTask = new TimerTask() {
+            int timeRemaining = 30;
+
+            @Override
+            public void run() {
+                if (timeRemaining > 0) {
+                    timeRemaining--;
+                    SwingUtilities.invokeLater(() -> view.getTimerLabel().setText("Timer: " + timeRemaining + "s"));
+                } else {
+                    SwingUtilities.invokeLater(() -> {
+                        view.showMessage("Time's up! Next player's turn.");
+                        onSkipTurnClicked();
+                    });
+                    cancel();
+                }
+            }
+        };
+        timer.scheduleAtFixedRate(timerTask, 0, 1000);
+    }
+
+    private void resetTimer() {
+        if (timerTask != null) {
+            timerTask.cancel();
+        }
+        startTimer();
     }
 }
