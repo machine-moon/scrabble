@@ -25,7 +25,8 @@ public class Game {
         panel.add(numPlayersField);
         panel.add(new JLabel("Enter number of AI players (max 5):"));
         panel.add(numAiPlayersField);
-        panel.add(timerModeCheckBox);
+        // uncomment for bonus
+        // panel.add(timerModeCheckBox);
 
         int result = JOptionPane.showConfirmDialog(null, panel, "Game Setup", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result != JOptionPane.OK_OPTION) {
@@ -42,11 +43,12 @@ public class Game {
         if (numAiPlayers > 5) {
             numAiPlayers = 5;
         }
-        boolean timerMode = timerModeCheckBox.isSelected();
+        // uncomment for bonus
+        // boolean timerMode = timerModeCheckBox.isSelected();
 
         // Initialize the model
         Model model = Model.getInstance(boardSize);
-        model.setTimerMode(timerMode);
+        model.setTimerMode(false);
 
         // Add players
         for (int i = 1; i <= numPlayers; i++) {
