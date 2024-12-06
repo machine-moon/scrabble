@@ -10,8 +10,7 @@ import view.View;
 import javax.swing.*;
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ControllerSaveLoadTest {
@@ -63,6 +62,25 @@ public class ControllerSaveLoadTest {
         assertEquals('C', board[7][7]);
         assertEquals('A', board[7][8]);
         assertEquals('T', board[7][9]);
+    }
+
+    @Test
+    public void testTimerModeFlag() {
+        model.setTimerMode(true);
+        assertTrue(model.isTimerMode());
+
+        // Verify the timer label in the view
+        assertTrue(view.getTimerLabel().isVisible());
+    }
+
+    @Test
+    public void test2TimerModeFlag() {
+        model.addObserver(view);
+        model.setTimerMode(false);
+        assertFalse(model.isTimerMode());
+
+        // Verify the timer label is hidden in the view
+        assertFalse(view.getTimerLabel().isVisible());
     }
 
 
