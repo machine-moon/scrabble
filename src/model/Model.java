@@ -153,6 +153,7 @@ public class Model implements Serializable {
         }
 
         board[row][col] = tile;
+        getCurrentPlayer().history.add(new Position(row, col));
         currentTurnPlacements.put(new Position(row, col), tile);
         getCurrentPlayer().removeTile(tile);
         notifyObservers("tilePlaced");
@@ -539,6 +540,8 @@ public class Model implements Serializable {
         }
 
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+        getCurrentPlayer().undoHistory.clear();
+        getCurrentPlayer().history.clear();
         notifyObservers("nextTurn");
     }
 
@@ -703,6 +706,41 @@ public class Model implements Serializable {
      */
     public void resetTimer() {
         notifyObservers("resetTimer");
+    }
+
+    /**
+     * Removes the tile at the position passed as an argument.
+     * Tile is removed as part of current player's turn.
+     *
+     * @param position
+     * @return the tile that is removed
+     */
+    public Character removeCurrentPlacementTile(Position position){
+        return currentTurnPlacements.remove(position);
+    }
+
+    /**
+     * Removes the tile at the position passed as argument from the board.
+     *
+     * @param row
+     * @param col
+     */
+    public void removeTileFromBoard(int row, int col) {
+        board[row][col] = '\0';
+        notifyObservers("board");
+    }
+
+    /**
+     * Adds the tile at the position passed as argument to the board.
+     *
+     * @param tile
+     * @param row
+     * @param col
+     */
+    public void addTileToBoard(Character tile, int row, int col) {
+        board[row][col] = tile;
+        currentTurnPlacements.put(new Position(row, col), tile);
+        notifyObservers("board");
     }
 
 }

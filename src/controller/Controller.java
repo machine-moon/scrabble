@@ -4,6 +4,7 @@ import model.AiPlayer;
 import model.Model;
 import model.Player;
 import view.View;
+import model.Position;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,6 +41,8 @@ public class Controller {
         view.getLoadButton().addActionListener(e -> onLoadButtonClicked());
         view.getSubmitButton().addActionListener(e -> onSubmitButtonClicked());
         view.getSkipTurnButton().addActionListener(e -> onSkipTurnClicked());
+        view.getUndoButton().addActionListener(e -> onUndoButtonClicked());
+        view.getRedoButton().addActionListener(e -> onRedoButtonClicked());
 
         // Loop through each cell button in the board and add action listener to each board cell button
         for (int row = 0; row < model.getBoardSize(); row++) {
@@ -159,6 +162,31 @@ public class Controller {
                 resetTimer();
             }
         }
+    }
+
+    /**
+     * Handles the event when the undo button is clicked.
+     */
+    public void onUndoButtonClicked() {
+        Player currentPlayer = model.getCurrentPlayer();
+        Position lastPositionPlayed = currentPlayer.history.removeLast();
+        Character lastTilePlayed = model.removeCurrentPlacementTile(lastPositionPlayed);
+        currentPlayer.undoHistory.add(lastPositionPlayed);
+        model.removeTileFromBoard(lastPositionPlayed.row, lastPositionPlayed.col);
+        currentPlayer.addTile(lastTilePlayed);
+        view.enableTile(lastTilePlayed);
+    }
+
+    /**
+     * Handles the event when the redo button is clicked.
+     */
+    public void onRedoButtonClicked() {
+        Player currentPlayer = model.getCurrentPlayer();
+        Position lastUndoPosition = currentPlayer.undoHistory.removeLast();
+        Character lastUndoTile = currentPlayer.tiles.removeLast();
+        currentPlayer.history.add(lastUndoPosition);
+        model.addTileToBoard(lastUndoTile, lastUndoPosition.row, lastUndoPosition.col);
+        view.disableTile(lastUndoTile);
     }
 
     /**

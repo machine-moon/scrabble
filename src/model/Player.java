@@ -2,6 +2,7 @@ package model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -12,6 +13,8 @@ public class Player implements Serializable {
     private String name;
     private int score;
     public List<Character> tiles;
+    public List<Position> undoHistory;
+    public List<Position> history;
 
     /**
      * Constructs a Player with the specified name.
@@ -22,6 +25,8 @@ public class Player implements Serializable {
         this.name = name;
         this.score = 0;
         this.tiles = new ArrayList<>();
+        this.undoHistory = new ArrayList<>();
+        this.history = new ArrayList<>();
     }
 
     /**
