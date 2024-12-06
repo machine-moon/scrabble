@@ -62,7 +62,7 @@ public class Model implements Serializable {
      *
      * @param xmlFileName the path to the XML configuration file
      */
-    private void loadBoardConfigFromXML(String xmlFileName) {
+    void loadBoardConfigFromXML(String xmlFileName) {
         File xmlFile = new File(xmlFileName);
         if (!xmlFile.exists()) {
             System.out.println("XML configuration file not found. Using default configuration.");

@@ -3,6 +3,9 @@ package model;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.nio.file.Paths;
+import java.util.Set;
+
 import static org.junit.Assert.*;
 
 public class ModelTest {
@@ -306,5 +309,25 @@ public class ModelTest {
         } catch (Exception e) {
             fail("The model should handle errors gracefully without crashing.");
         }
+    }
+    @Test
+    public void testLoadValidXML() {
+        // Assume board_valid.xml is placed in src/test/resources directory
+        String validXmlPath = "src/model/board_valid.xml";
+        model.loadBoardConfigFromXML(validXmlPath);
+
+        Set<Position> TW = model.getTripleWordScore();
+
+        assertTrue("Expected TW at (0,7) from valid XML", TW.contains(new Position(0, 7)));
+        assertFalse("Did not expect TW at (0,0) since we overrode defaults", TW.contains(new Position(0, 0)));
+    }
+    @Test
+    public void testLoadInvalidXML() {
+        // Assume board_invalid.xml is a malformed or incorrect config file
+        String invalidXmlPath = "src/model/board_invalid.xml";
+        model.loadBoardConfigFromXML(invalidXmlPath);
+
+        Set<Position> TW = model.getTripleWordScore();
+        assertTrue("Invalid XML should revert to defaults, expecting TW at (0,0)", TW.contains(new Position(0, 0)));
     }
 }

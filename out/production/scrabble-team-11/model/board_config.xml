@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <board>
-    <size>14</size>
+    <size>15</size>
     <premiumSquares>
         <!-- Triple Word Score -->
         <square row="0" col="0" type="TW"/>
