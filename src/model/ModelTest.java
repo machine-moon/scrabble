@@ -312,9 +312,7 @@ public class ModelTest {
     }
     @Test
     public void testLoadValidXML() {
-        // Assume board_valid.xml is placed in src/test/resources directory
-        String validXmlPath = "src/model/board_valid.xml";
-        model.loadBoardConfigFromXML(validXmlPath);
+        model.loadBoardConfigFromXML("src/model/board_valid.xml");
 
         Set<Position> TW = model.getTripleWordScore();
 
@@ -323,10 +321,7 @@ public class ModelTest {
     }
     @Test
     public void testLoadInvalidXML() {
-        // Assume board_invalid.xml is a malformed or incorrect config file
-        String invalidXmlPath = "src/model/board_invalid.xml";
-        model.loadBoardConfigFromXML(invalidXmlPath);
-
+        model.loadBoardConfigFromXML("src/model/board_invalid.xml");
         Set<Position> TW = model.getTripleWordScore();
         assertTrue("Invalid XML should revert to defaults, expecting TW at (0,0)", TW.contains(new Position(0, 0)));
     }
