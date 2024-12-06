@@ -4,11 +4,13 @@ package view;
 import model.Model;
 import model.ModelObserver;
 import model.Player;
+import model.Position;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -253,38 +255,33 @@ public class View extends JFrame implements ModelObserver {
      *
      * @param board the board state to update
      */
-    public void updateBoard(char[][] board) {
+    public void updateBoard(char[][] board, Model m) {
+        // Assume you have a reference to the model:
+        Set<Position> TW = m.getTripleWordScore();
+        Set<Position> DW = m.getDoubleWordScore();
+        Set<Position> TL = m.getTripleLetterScore();
+        Set<Position> DL = m.getDoubleLetterScore();
+
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
                 JButton cell = getBoardCellButton(row, col);
                 char c = board[row][col];
                 cell.setText(c == '\0' ? "" : String.valueOf(c));
-                // Reapply center tile styling to maintain its special appearance
 
-                if ((row == 0 && (col == 0 || col == 7 || col == 14)) ||
-                        (row == 7 && (col == 0 || col == 14)) ||
-                        (row == 14 && (col == 0 || col == 7 || col == 14))) {
-                    cell.setBackground(DARK_RED); // Triple Word Score
-                } else if ((row == col && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13)) ||
-                        ((row + col == 14) && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13))) {
-                    cell.setBackground(DARK_PINK); // Double Word Score
-                } else if (((row == 1 || row == 13) && (col == 5 || col == 9)) ||
-                        ((row == 5 || row == 9) && (col == 1 || col == 13)) ||
-                        (row == 5 && col == 5) || (row == 5 && col == 9) ||
-                        (row == 9 && col == 5) || (row == 9 && col == 9)) {
-                    cell.setBackground(DARK_BLUE); // Triple Letter Score
-                } else if (((row == 0 || row == 14) && (col == 3 || col == 11)) ||
-                        ((row == 2 || row == 12) && (col == 6 || col == 8)) ||
-                        ((row == 3 || row == 11) && (col == 0 || col == 14)) ||
-                        ((row == 6 || row == 8) && (col == 2 || col == 12)) ||
-                        ((row == 6 || row == 8) && (col == 6 || col == 8))) {
-                    cell.setBackground(DARK_CYAN); // Double Letter Score
-                } else if (row == 7 && col == 7) {
-                    cell.setBackground(DARK_ORANGE); // Center Tile
+                Position pos = new Position(row, col);
+                if (TW.contains(pos)) {
+                    cell.setBackground(DARK_RED);
+                } else if (DW.contains(pos)) {
+                    cell.setBackground(DARK_PINK);
+                } else if (TL.contains(pos)) {
+                    cell.setBackground(DARK_BLUE);
+                } else if (DL.contains(pos)) {
+                    cell.setBackground(DARK_CYAN);
+                } else if (row == center && col == center) {
+                    cell.setBackground(DARK_ORANGE);
                 } else {
-                    cell.setBackground(Color.WHITE); // Regular Tile
+                    cell.setBackground(Color.WHITE);
                 }
-
             }
         }
         boardPanel.revalidate();
@@ -414,7 +411,7 @@ public class View extends JFrame implements ModelObserver {
         this.currentPlayer = m.getCurrentPlayer();
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
         updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
-        updateBoard(m.getBoardState());
+        updateBoard(m.getBoardState(), m);
         setVisible(true);
 
     }
@@ -425,7 +422,7 @@ public class View extends JFrame implements ModelObserver {
      * @param m the model to update
      */
     private void handleBoardUpdate(Model m) {
-        updateBoard(m.getBoardState());
+        updateBoard(m.getBoardState(), m);
     }
 
     /**
@@ -435,7 +432,7 @@ public class View extends JFrame implements ModelObserver {
      */
     private void handleCenterNotCovered(Model m) {
         showMessage("First word must be placed covering the center square.");
-        updateBoard(m.getBoardState());
+        updateBoard(m.getBoardState(), m);
         updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
     }
@@ -447,7 +444,7 @@ public class View extends JFrame implements ModelObserver {
      */
     private void handleInvalidWord(Model m) {
         showMessage("Invalid word! Please try again.");
-        updateBoard(m.getBoardState());
+        updateBoard(m.getBoardState(), m);
         updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
     }
@@ -459,7 +456,7 @@ public class View extends JFrame implements ModelObserver {
      */
     private void handleNoWordFound(Model m) {
         showMessage("No new word found! Please try again.");
-        updateBoard(m.getBoardState());
+        updateBoard(m.getBoardState(), m);
 
     }
 
@@ -470,7 +467,7 @@ public class View extends JFrame implements ModelObserver {
      */
     private void handleAdjacentWord(Model m) {
         showMessage("Word not adjacent! Please try again.");
-        updateBoard(m.getBoardState());
+        updateBoard(m.getBoardState(), m);
 
     }
 
@@ -481,7 +478,7 @@ public class View extends JFrame implements ModelObserver {
      */
     private void handleWordSubmitted(Model m) {
         showMessage("Word accepted! Your score has been updated.");
-        updateBoard(m.getBoardState());
+        updateBoard(m.getBoardState(), m);
         updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
     }
