@@ -1,5 +1,5 @@
 # Scrabble Game - Team 11 Project
-## IMPORTANT NOTE: JAR ISNT RUNNING ON MY END DUE IN 1 MINUTE, JUST RUN GAME.GAME OUR MAIN IS THERE OUR PROGRAM WORKS THANKS :D
+
 ## Authors
 - Tarek Ibrahim, Arjun Pathak, Manit Jawa, Mithushan Ravichandramohan
 - SYSC 3110 - Fall 2024
