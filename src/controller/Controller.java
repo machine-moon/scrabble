@@ -133,6 +133,11 @@ public class Controller {
      * Handles the event when the skip turn button is clicked.
      */
     public void onSkipTurnClicked() {
+        if (model.isFirstTurn()){
+            model.nextTurn(); // to send a notif
+            return;
+        }
+
         model.restorePlayerTiles();
         reenablePlayerTiles();
         model.nextTurn();

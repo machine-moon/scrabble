@@ -152,7 +152,6 @@ public class View extends JFrame implements ModelObserver {
         leftPanel.add(loadButton);
 
 
-
         // The game isn't actually ready till the controller says so, via the update() method
         setVisible(false);
     }
@@ -452,7 +451,6 @@ public class View extends JFrame implements ModelObserver {
         updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         updateBoard(m.getBoardState());
         setVisible(true);
-
     }
 
     /**
@@ -563,11 +561,12 @@ public class View extends JFrame implements ModelObserver {
     /**
      * Enables a player tile
      */
-    public void enableTile(Character c){
-        for(JButton button: playerTiles){
-            if (button.getText().equals(c.toString()) && !button.isEnabled()){
+    public void enableTile(Character c) {
+        for (JButton button : playerTiles) {
+            if (button.getText().equals(c.toString()) && !button.isEnabled()) {
                 button.setEnabled(true);
-                button.setBackground(Color.cyan);
+                button.setBackground(null);
+                break;
             }
         }
     }
@@ -575,9 +574,9 @@ public class View extends JFrame implements ModelObserver {
     /**
      * Disables a player tile
      */
-    public void disableTile(Character c){
-        for(JButton button: playerTiles){
-            if (button.getText().equals(c.toString()) && button.isEnabled()){
+    public void disableTile(Character c) {
+        for (JButton button : playerTiles) {
+            if (button.getText().equals(c.toString()) && button.isEnabled()) {
                 button.setEnabled(false);
                 button.setBackground(Color.cyan);
             }

@@ -537,6 +537,7 @@ public class Model implements Serializable {
     public void nextTurn() {
         if (isFirstTurn()) {
             notifyObservers("firstTurn");
+            return;
         }
 
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
