@@ -129,33 +129,26 @@ The rules of the game can be found here: [Scrabble Rules](https://en.wikipedia.o
 
 - **Mithushan Ravichandramohan**
   - Auto-generated UML diagrams for project structure visualization.
-  - Implemented last minute unit tests.
   
 - **Arjun Pathak**
-  - Integrated premium squares functionality within the model and updated the view to highlight them.
-  - Enhanced scoring functionality related to premium squares.
   - Added custom board display, validation and their tests.
 
 - **Manit Jawa**
-  - Reviewed and confirmed game rules regarding blank tiles in the tile bag.
-  - Collaborated with Arjun on model adjustments concerning blank tiles.
   - Conducted app testing and documented findings.
   - Added Undo, Redo feature and their tests
 
 - **Tarek Ibrahim**
-  - Designed and fully implemented Main/Game, Controller, View, and bug fixes.
-  - Conducted thorough app testing and documented bugs for comparison with previous versions.
-  - Developed AI implementation to allow for dynamic gameplay with AI players.
-  - Created and updated comprehensive Java documentation, including `@param` and `@return` annotations.
-  - Ensured the proper functionality of the AI class.
-  - Prepared the project for final submission.
+  - Added a main menu/ui
   - Added Save/Load Functionality and thier tests.
-
+  - integrated everyones code.
+  
 ## Known Bugs
+  - Ai plays on top of premium squares
 
-- After placing player tiles, the highlighted CYAN color stays sometimes.
-- If a player doesn't play in the center on the first turn, the model rejects the input as the player must start from the center; the player doesn't get the played tiles back, though they receive random new ones as replacements.
-- Ai plays on top of premium squares
+## BONUS:
+  - you can find bonus tests in controllerTests
+  - we ALL did bonus together.
+
 
 ## License
 
