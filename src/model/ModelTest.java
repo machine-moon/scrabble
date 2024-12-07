@@ -312,7 +312,7 @@ public class ModelTest {
 
     @Test
     public void testLoadValidXML() {
-        model.loadBoardConfigFromXML("src/model/board_valid.xml");
+        model.loadBoardConfigFromXML("src/model/test_board_valid.xml");
 
         Set<Position> TW = model.getTripleWordScore();
 
@@ -322,7 +322,7 @@ public class ModelTest {
 
     @Test
     public void testLoadInvalidXML() {
-        model.loadBoardConfigFromXML("src/model/board_invalid.xml");
+        model.loadBoardConfigFromXML("src/model/test_board_invalid.xml");
         Set<Position> TW = model.getTripleWordScore();
         assertTrue("Invalid XML should revert to defaults, expecting TW at (0,0)", TW.contains(new Position(0, 0)));
     }
