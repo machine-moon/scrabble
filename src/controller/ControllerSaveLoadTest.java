@@ -9,9 +9,10 @@ import view.View;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ControllerSaveLoadTest {
@@ -65,5 +66,48 @@ public class ControllerSaveLoadTest {
         assertEquals('T', board[7][9]);
     }
 
+    @Test
+    public void testUndo() {
+        JButton undoButton = view.getUndoButton();
+
+        player1.addTile('B');
+        player1.addTile('A');
+        player1.addTile('T');
+        model.placeTile('B', 7, 7);
+        model.placeTile('A', 7, 8);
+        model.placeTile('T', 7, 9);
+
+        undoButton.doClick();
+
+        char[][] board = model.getBoardState();
+        assertEquals('\0', board[7][9]);
+
+        List<Character> playerTiles = new ArrayList<Character>();
+        playerTiles = player1.getTiles();
+        assertEquals('T', playerTiles.getLast().charValue());
+    }
+
+    @Test
+    public void testRedo() {
+        JButton undoButton = view.getUndoButton();
+        JButton redoButton = view.getRedoButton();
+
+        player1.addTile('B');
+        player1.addTile('A');
+        player1.addTile('T');
+        model.placeTile('B', 7, 7);
+        model.placeTile('A', 7, 8);
+        model.placeTile('T', 7, 9);
+
+        undoButton.doClick();
+
+        char[][] board = model.getBoardState();
+        List<Character> playerTiles = new ArrayList<Character>();
+        playerTiles = player1.getTiles();
+
+        redoButton.doClick();
+        assertEquals('T', board[7][9]);
+        assertFalse(playerTiles.contains('T'));
+    }
 
 }
