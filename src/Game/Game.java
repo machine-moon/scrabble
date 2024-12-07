@@ -7,6 +7,8 @@ import view.View;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.util.Objects;
 
 public class Game {
 
@@ -27,6 +29,15 @@ public class Game {
         panel.add(numAiPlayersField);
         panel.add(timerModeCheckBox);
 
+        // Add dropdown for board configuration files
+        panel.add(new JLabel("Select board configuration:"));
+        JComboBox<String> boardConfigDropdown = new JComboBox<>();
+        File configDir = new File("src/model");
+        for (File file : Objects.requireNonNull(configDir.listFiles((dir, name) -> name.endsWith(".xml")))) {
+            boardConfigDropdown.addItem(file.getPath());
+        }
+        panel.add(boardConfigDropdown);
+
         int result = JOptionPane.showConfirmDialog(null, panel, "Game Setup", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result != JOptionPane.OK_OPTION) {
             System.exit(0);
@@ -43,9 +54,10 @@ public class Game {
             numAiPlayers = 5;
         }
         boolean timerMode = timerModeCheckBox.isSelected();
+        String boardConfigPath = (String) boardConfigDropdown.getSelectedItem();
 
         // Initialize the model
-        Model model = Model.getInstance(boardSize);
+        Model model = Model.getInstance(boardSize, boardConfigPath);
         model.setTimerMode(timerMode);
 
         // Add players

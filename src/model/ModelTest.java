@@ -3,7 +3,6 @@ package model;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.nio.file.Paths;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -15,7 +14,7 @@ public class ModelTest {
 
     @Before
     public void setUp() {
-        model = Model.getInstance(15);
+        model = Model.getInstance(15, "src/model/board_config.xml");
         player1 = new Player("Player 1");
         player2 = new Player("Player 2");
         model.addPlayer(player1);
@@ -310,6 +309,7 @@ public class ModelTest {
             fail("The model should handle errors gracefully without crashing.");
         }
     }
+
     @Test
     public void testLoadValidXML() {
         model.loadBoardConfigFromXML("src/model/board_valid.xml");
@@ -319,6 +319,7 @@ public class ModelTest {
         assertTrue("Expected TW at (0,7) from valid XML", TW.contains(new Position(0, 7)));
         assertFalse("Did not expect TW at (0,0) since we overrode defaults", TW.contains(new Position(0, 0)));
     }
+
     @Test
     public void testLoadInvalidXML() {
         model.loadBoardConfigFromXML("src/model/board_invalid.xml");

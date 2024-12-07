@@ -40,9 +40,10 @@ public class Model implements Serializable {
     /**
      * Initializes the game model with the specified board size.
      *
-     * @param boardSize the size of the board (e.g., 15 for a 15x15 board)
+     * @param boardSize       the size of the board (e.g., 15 for a 15x15 board)
+     * @param boardConfigPath the path to the board configuration XML file
      */
-    private Model(int boardSize) {
+    private Model(int boardSize, String boardConfigPath) {
         this.boardSize = boardSize;
         this.board = new char[boardSize][boardSize];
         this.players = new ArrayList<>();
@@ -52,7 +53,7 @@ public class Model implements Serializable {
         this.wordlist = loadWordList("src/model/wordlist.txt");
         this.currentTurnPlacements = new HashMap<>();
         this.isFirstTurn = true;
-        loadBoardConfigFromXML("src/model/board_config.xml");
+        loadBoardConfigFromXML(boardConfigPath);
 
     }
 
@@ -297,9 +298,9 @@ public class Model implements Serializable {
      * @param boardSize the size of the board
      * @return the singleton instance of the model
      */
-    public static Model getInstance(int boardSize) {
+    public static Model getInstance(int boardSize, String boardConfigPath) {
         if (instance == null) {
-            instance = new Model(boardSize);
+            instance = new Model(boardSize, boardConfigPath);
         }
         return instance;
     }
@@ -779,7 +780,7 @@ public class Model implements Serializable {
      * @return true if the game is over, false otherwise
      */
     public boolean isGameOver() {
-        // Example condition: when the tile bag is empty and a player has no tiles left
+        // Example condition: when the tile bag is empty and a player has less than 3 tiles
         boolean status = tileBag.isEmpty() && players.stream().anyMatch(player -> player.getTiles().size() < 3);
         if (status) {
             notifyObservers("gameOver");
@@ -943,7 +944,7 @@ public class Model implements Serializable {
      * @param position
      * @return the tile that is removed
      */
-    public Character removeCurrentPlacementTile(Position position){
+    public Character removeCurrentPlacementTile(Position position) {
         return currentTurnPlacements.remove(position);
     }
 
