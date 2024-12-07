@@ -134,6 +134,7 @@ The rules of the game can be found here: [Scrabble Rules](https://en.wikipedia.o
 - **Arjun Pathak**
   - Integrated premium squares functionality within the model and updated the view to highlight them.
   - Enhanced scoring functionality related to premium squares.
+  - Added custom board display, validation and their tests.
 
 - **Manit Jawa**
   - Reviewed and confirmed game rules regarding blank tiles in the tile bag.
@@ -148,6 +149,7 @@ The rules of the game can be found here: [Scrabble Rules](https://en.wikipedia.o
   - Created and updated comprehensive Java documentation, including `@param` and `@return` annotations.
   - Ensured the proper functionality of the AI class.
   - Prepared the project for final submission.
+  - Added Save/Load Functionality and thier tests.
 
 ## Known Bugs
 
