@@ -1,20 +1,16 @@
 package model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
  * Represents a player in the game.
  */
-public class Player implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Player {
+
     private String name;
     private int score;
     public List<Character> tiles;
-    public List<Position> undoHistory;
-    public List<Position> history;
 
     /**
      * Constructs a Player with the specified name.
@@ -25,17 +21,6 @@ public class Player implements Serializable {
         this.name = name;
         this.score = 0;
         this.tiles = new ArrayList<>();
-        this.undoHistory = new ArrayList<>();
-        this.history = new ArrayList<>();
-    }
-
-    /**
-     * Checks if the player is an AI player.
-     *
-     * @return true if the player is an AI player, false otherwise
-     */
-    public boolean isAi() {
-        return false;
     }
 
     /**
@@ -109,7 +94,7 @@ public class Player implements Serializable {
      * @param tile
      */
     public void removeTile(char tile) {
-        tiles.remove(Character.valueOf(tile));
+        tiles.remove(tile);
     }
 
     /**

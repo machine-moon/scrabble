@@ -1,14 +1,10 @@
 package model;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * Represents a position in the maze.
  */
-public class Position implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;    public final int row;
+public class Position {
+    public final int row;
     public final int col;
 
     public Position(int row, int col) {

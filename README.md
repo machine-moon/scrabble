@@ -1,155 +1,93 @@
-# Scrabble Game - Team 11 Project
+Scrabble Game - Team 11 Project
 
 ## Authors
-- Tarek Ibrahim, Arjun Pathak, Manit Jawa, Mithushan Ravichandramohan
+- Mithushan Ravichandramohan, Tarek Ibrahim, Arjun Pathak, Manit Jawa
 - SYSC 3110 - Fall 2024
 
 ## Overview of the Project
-This project is a Java version of the Scrabble game, designed using the Model-View-Controller (MVC) architecture. Players can interactively play Scrabble, adhering to standard rules regarding word creation, tile placement, and score calculation.
+This project is a Java version of the Scrabble game, which has been designed using the Model-View-Controller, or MVC architecture. The player is allowed to interactively play Scrabble, considering the standard rules concerning word creation, tile placing, and score calculation.
 
 ## Setup
 
-The following are detailed steps to run the Scrabble game.
+The following are detailed steps that can be followed to run the game Scrabble.
 
 ### Prerequisites 
-1. Ensure `wordlist.txt` is in the same directory as the model.
-2. The system must be running Java. Java can be installed for your specific device from here: [Java Downloads](https://www.oracle.com/ca-en/java/technologies/downloads/)
+1.	Ensure `words_alpha.txt` is in the same directory as model.
+2.	The system must be running Java. Java can be installed for your specific device from here: https://www.oracle.com/ca-en/java/technologies/downloads/
 
-### Downloading Scrabble from GitHub and Running the Game
+### Downlaoding Scrabble from GitHub and Running the game
 1. Clone the repository or extract the archive to your desired location.
-2. Open the project in your preferred Java IDE or navigate to the project directory in your command line.
-3. Run `Game.java` to start the game (e.g., in the command line, execute `java Game`).
-4. The game Scrabble is now running and can be played by the players. 
+2. Open the project in your preferred Java IDE, or navigate to the project directory in your command line.
+3. Run `Main.java` to start the game (e.g., in the command line, execute `java Main`).
+4. The game Scrabble is now running and the game can now be played by players. 
 
-## Usage - Playing the Game
+## Usage - Playing the game
 
 ### Rules of Scrabble
-The rules of the game can be found here: [Scrabble Rules](https://en.wikipedia.org/wiki/Scrabble)
+The rules of the game can be found here: https://en.wikipedia.org/wiki/Scrabble
 
 ### Gameplay
-1. Enter board size, number of players, number of ai players. 
-2. If you would like a timer for each turn, check the timer mode option. (BONUS)
-3. Select a board configuration from the different kinds of board configurations available.
-4. Enter names for each player and click OK.
-5. The game is now loaded. At the top, the current player and score is displayed.
-6. If you would like to load a previously saved game, click on Load Game.
-7. Click on the letter you want to place on the board, then click the tile where it should be placed (The game must start with the word placed in the center, marked in orange).
-8. If you would like to undo a letter placement, click on Undo.
-9. If you would like to redo a letter placement, click on Redo.
-10. If you would like to skip your turn, click on Skip Turn. 
-11. Hit submit to submit the word once you are satisfied with word placement.
-12. The score of the current player will be displayed on top.
-13. Keep playing until a winner is found.
-14. View the Images folder for screenshots of gameplay.
+1. Click on the letter you want to place on the board and then click the tile on the board where it should be placed (The game must be started with the word placed in the center, marked in orange)
+2. Hit submit to submit the word or skip to skip your turn
+3. The score of the current player will be displayed on top.
+4. Keep playing until a winner is found 
+5. View Images folder for screenshots
 
 ## Project Structure
 
-- src/Game
-- **Game.java**: The main class for the Scrabble game, responsible for initializing the game, setting up the board size, number of players, and AI players, and starting the game by creating instances of Model, View, and Controller.
+* **Controller.java**: In this program, the Controller acts like an intermediary between the `Model`, the game's logic, and the `View`, the user interface. It processes the moves the player makes and updates changes in the state of the game.
+- **Main.java**: entry point; instantiates and wires the game components of Model, View, and Controller and launches the game.
+- **Model.java**: responsible for the business logic of the game; it maintains the game board, players, and tile bag, implementing all the rules of Scrabble.
+- **ModelObserver.java**: defines an interface for listeners of `Model` changes; allows the `View` to update its state whenever the `Model` changes.
+- **Player.java**: represents a player; he maintains his current score, his tile rack, and the moves that he has made.
+- **Position.java**: Helper class for position handling on the board game, used in tile placement.
+- **TileBag.java**: The bag holding all the tiles that are being drawn by the players; in charge of drawing new tiles and keeping track of how many tiles are left in the bag.
+- **UserActionListener.java**: Abstract Interface to the Controller for user action handling, then inform `Model`.
+-**View.java**: GUI displaying the actual status of the board, points of players, and messages. It refreshes automatically on every change of the Model.
 
-- src/META-INF
-- **MANIFEST.MF**: Metadata file containing information about the files contained in the JAR (Java ARchive) file.
-
-- src/controller
-- **Controller.java**: Acts as an intermediary between the `Model` and the `View`, processing player moves, handling user interactions, and updating the game state.
-- **ControllerTests**: Tests for the controller class
-
-- src/model
-- **AiPlayer.java**: Represents an AI player; extends the Player class with additional AI-specific logic.
-- **Model.java**: Implements the business logic of the game; maintains the game board, players, tile bag, and Scrabble rules.
-- **ModelObserver.java**: Interface for listeners of `Model` changes, allowing the `View` to update its state when the `Model` changes.
-- **ModelTest.java**: Contains unit tests for the `Model` class to ensure the game logic is implemented correctly.
-- **Player.java**: Represents a player in the game, maintaining their current score, tile rack, and move history.
-- **Position.java**: Helper class for handling positions on the game board, used in tile placement.
-- **TileBag.java**: Manages the pool of tiles available for drawing by players, implementing the tile drawing and tracking remaining tiles.
-- **wordlist.txt**: Contains a list of valid words for the Scrabble game, used by the `Model` to validate word submissions.
-- **board_config.xml, board_invalid.xml, board_valid.xml**: Different configurations of the board that can be loaded into the game.
-
-- src/view
-- **View.java**: The graphical user interface (GUI) for the game, displaying the board status, player points, and messages, and updating automatically on `Model` changes.
-
-- src/wordlist.txt
-- **wordlist.txt**: Another text file containing a list of valid words for the Scrabble game, used by the `Model` to validate word submissions. This may be a duplicate or an alternate word list.
 
 ## Features
 
-- **Updated game board**: The game board now contains multiple premium scores allowing for scoring of multiple points when a word is formed using them.
-- **Names of players**: Asks for names of all human players in the game.
-- **Turn-based Multiplayer**: Allows multiple players to play in turns by placing tiles and forming words.
-- **Word Validator**: Checks every played word against a predetermined list to ensure only legal Scrabble words are accepted.
-- **Scoring Calculations**: Calculates and tracks the current score of players placing valid words on the board.
-- **Dynamic Board Update**: The board and player scores dynamically update as players make moves.
-- **AI Integration**: Added AI functionality for automated gameplay.
-- **New AI popup**: Asks for the number of AI players.
-- **Premium Squares**: Introduced premium squares to enhance strategic gameplay.
-- **Improved Scoring Logic**: Enhanced the accuracy and efficiency of scoring calculations.
-- **Option to Enter Board Size**: Custom board size can now be entered.
-- **Option to Enter Number of Players**: Number of players can be entered.
-- **Select Board Configuration**: Custom board configurations can now be selected.
-- **BONUS: Timer Mode**: Timer mode can be enabled that puts a timer for each player's turn.
-- **Undo, Redo**: Undo and Redo is now available. Players can undo and redo their letter placement.
-- **Save Game, Load Game**: Game can be saved and loaded later now.
+- **Turn-based Multiplayer**: This allows multiple players to play in turns by placing tiles and forming words.
+- **Word Validator**: A check of every word played, against a predetermined word list, to assure only Scrabble legal words are accepted.
+- **Scoring Calculations**: The calculation and tracking of the current score of players placing valid words on the board.
+- **Dynamic Board Update**: The board and player scores would dynamically update as the players make moves.
 
 ## Technologies Used
 
-- **Java**: Primary programming language for game logic and GUI development.
-- **Swing**: Used for designing the GUI.
-- **MVC Architecture**: Helps segregate the game's logic, user interface, and interaction handling for a clean and maintainable codebase.
+- **Java**: Primary programming for the game logic and GUI.
+- **Swing**: For designing the GUI.
+MVC Architecture: Logics of game, user interface, and handling the interactions further segregate to keep the code clean and maintainable.
 
 ## Critical Changes/Improvements
 
-- Added GUI to enhance user interaction.
-- Added AI player functionality with speed.
-- Added action listeners via the controller.
-- The view is now a GUI only, and all logic has been decoupled and given to the controller or model.
-- Implemented ALL events through a streamlined process (bottom of the view).
-- AI strategy is algorithmic; it finds all possible words, ranks them from high to low score, finds a place that the model allows it to place (brute force, hence notifications were silenced during AI turns), then places them.
-- Changed the architecture from:
-    ```
-    model <-> controller <-> view
-    ```
-  to:
-   ```
-    model <-> controller
-    |       /
-    view  /
-    ```
-  This was done to improve code coherence and maintainability after a team member made conflicting changes in the master branch.
-- Several new features were added:
-- **Option to Enter Board Size**: Custom board size can now be entered.
-- **Option to Enter Number of Players**: Number of players can be entered.
-- **Select Board Configuration**: Custom board configurations can now be selected.
-- **BONUS: Timer Mode**: Timer mode can be enabled that puts a timer for each player's turn.
-- **Undo, Redo**: Undo and Redo is now available. Players can undo and redo their letter placement.
-- **Save Game, Load Game**: Game can be saved and loaded later now.
+Added Gui, Why? becuase its required.
+added a singleton method aproach, only 1 instance of the model may exist.
+changed archtecture from 
 
-- BONUS: Timer mode was chosen as bonus and tests for timer are available in controller tests.
+model <-> controller
+|	   /
+view  /
 
-## Contributions
+to 
 
-- **Mithushan Ravichandramohan**
-  - Auto-generated UML diagrams for project structure visualization.
-  
-- **Arjun Pathak**
-  - Added custom board display, validation and their tests.
+model <-> controller <-> view
 
-- **Manit Jawa**
-  - Conducted app testing and documented findings.
-  - Added Undo, Redo feature and their tests
+why? A team memeber didnt sync with master and decided theyll change everything and this is the architecture they decided. its fine it works.
+							
 
-- **Tarek Ibrahim**
-  - Added a main menu/ui
-  - Added Save/Load Functionality and thier tests.
-  - integrated everyones code.
-  
-## Known Bugs
-  - Ai plays on top of premium squares
 
-## BONUS:
-  - you can find bonus tests in controllerTests
-  - we ALL did bonus together.
+## Bugs
+
+we have bugs due to one team memebr doing their own thing and messing with the master branch, we are aware of the bugs and will fix on next milestone.
+
+Player's tiles do not update after they placed a word correctly on the board i.e. the corresponding letters are not removed from the Player's tiles
+Once an incorrect word is detected, Player gets more letters in their tile, instead of the tile remaining unchanged.
+The first letter can be placed anywhere on the board violating the rules of the game that the first letter should be placed in the center.
 
 
 ## License
 
-This open-source project is licensed under the Open Source License, allowing free usage and modification without any restrictions.
+This open-source project comes under the Open Source License, allowing free usage and modification without any restriction.
+
+   

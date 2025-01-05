@@ -1,275 +1,156 @@
 package controller;
 
-import model.AiPlayer;
 import model.Model;
 import model.Player;
+import model.ModelObserver;
 import view.View;
-import model.Position;
 
-import javax.swing.*;
-import java.awt.*;
-import java.io.*;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * The Controller class handles the game logic and user interactions.
  */
-public class Controller {
+public class Controller implements UserActionListener, ModelObserver {
     private Model model;
     private View view;
-    private Character selectedPlayerChar;
-    private JButton selectedPlayerTileBtn;
-    private TimerTask timerTask;
+    private Character selectedTile;
 
     /**
-     * Constructs a Controller with the specified model and view.
+     * Constructor for the Controller class
      *
-     * @param m the model
-     * @param v the view
+     * @param model
+     * @param view
      */
-    public Controller(Model m, View v) {
-        model = m;
-        view = v;
-        selectedPlayerChar = null;
-        selectedPlayerTileBtn = null;
+    public Controller(Model model, View view) {
+        this.model = model;
+        this.view = view;
+        this.selectedTile = null;
 
+        // Set the action listener in the view
+        view.setUserActionListener(this);
 
-        // Add action listeners to view components
-        view.getSaveButton().addActionListener(e -> onSaveButtonClicked());
-        view.getLoadButton().addActionListener(e -> onLoadButtonClicked());
-        view.getSubmitButton().addActionListener(e -> onSubmitButtonClicked());
-        view.getSkipTurnButton().addActionListener(e -> onSkipTurnClicked());
-        view.getUndoButton().addActionListener(e -> onUndoButtonClicked());
-        view.getRedoButton().addActionListener(e -> onRedoButtonClicked());
+        // Register as an observer of the model
+        this.model.addObserver(this);
 
-        // Loop through each cell button in the board and add action listener to each board cell button
-        for (int row = 0; row < model.getBoardSize(); row++) {
-            for (int col = 0; col < model.getBoardSize(); col++) {
-                JButton cellButton = view.getBoardCellButton(row, col);
-                final int currentRow = row;
-                final int currentCol = col;
-                cellButton.addActionListener(e -> onBoardCellClicked(currentRow, currentCol, (JButton) e.getSource()));
+        view.initializeBoard(model.getBoardSize());
+        view.initializeTileRack(model.getCurrentPlayer().getTiles());
+        view.updateStatus("Current player: " + model.getCurrentPlayer().getName() + " | Score: " + model.getCurrentPlayer().getScore());
+
+    }
+
+    /**
+     * This method is called when a tile is selected from the tile rack.
+     *
+     * @param tile
+     */
+    @Override
+    public void onTileSelected(char tile) {
+        selectedTile = tile;
+    }
+
+    /**
+     * This method is called when a tile is placed on the board.
+     *
+     * @param row
+     * @param col
+     */
+    @Override
+    public void onBoardCellClicked(int row, int col) {
+        if (selectedTile != null) {
+            Player currentPlayer = model.getCurrentPlayer();
+            if (currentPlayer.hasTile(selectedTile)) {
+                boolean success = model.placeTile(selectedTile, row, col);
+                if (success) {
+                    // Remove the tile from the player's rack
+                    currentPlayer.removeTile(selectedTile);
+                    // Update the view
+                    view.disableTileButton(selectedTile);
+                    view.deselectTile();
+                    selectedTile = null;
+                } else {
+                    view.showMessage("Invalid tile placement. Try again.");
+                }
+            } else {
+                view.showMessage("You don't have that tile.");
+                selectedTile = null;
             }
-        }
-
-        // Add action listeners to player tile rack buttons
-        for (JButton tileButton : view.getPlayerTiles()) {
-            tileButton.addActionListener(e -> onPlayerTileSelected((JButton) e.getSource()));
-        }
-
-        if (model.isTimerMode()) {
-            startTimer();
+        } else {
+            view.showMessage("Please select a tile first.");
         }
     }
 
     /**
-     * Handles the event when the save button is clicked.
-     */
-    private void onSaveButtonClicked() {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("game_save.ser"))) {
-            out.writeObject(model);
-            view.showMessage("Game saved successfully!");
-        } catch (IOException e) {
-            view.showMessage("Error saving game: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Handles the event when the load button is clicked.
-     */
-    private void onLoadButtonClicked() {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("game_save.ser"))) {
-            model = (Model) in.readObject();
-            model.addObserver(view); // Reattach the view as an observer
-            view.update("initialize", model);
-            view.showMessage("Game loaded successfully!");
-        } catch (FileNotFoundException e) {
-            view.showMessage("Save file not found. Please ensure the save file exists.");
-        } catch (InvalidClassException | StreamCorruptedException e) {
-            view.showMessage("Save file is corrupted or incompatible. Please try saving the game again.");
-        } catch (IOException | ClassNotFoundException e) {
-            view.showMessage("Error loading game: " + e.getMessage());
-        }
-    }
-
-
-    /**
-     * Handles the event when a player tile is selected.
-     *
-     * @param tileButton the selected player tile button
-     */
-    public void onPlayerTileSelected(JButton tileButton) {
-        if (selectedPlayerTileBtn != null) {
-            selectedPlayerTileBtn.setBackground(null); // Deselect previous tile
-        }
-
-        selectedPlayerChar = tileButton.getText().charAt(0);
-        selectedPlayerTileBtn = tileButton;
-        // Highlight selected tile
-        tileButton.setBackground(Color.CYAN);
-    }
-
-    /**
-     * Handles the event when a board cell is clicked.
-     *
-     * @param row        the row of the board cell
-     * @param col        the column of the board cell
-     * @param cellButton the board cell button
-     */
-    public void onBoardCellClicked(int row, int col, JButton cellButton) {
-        if (selectedPlayerChar != null) {
-            if (model.placeTile(selectedPlayerChar, row, col)) {
-                selectedPlayerTileBtn.setBackground(Color.GRAY); // unhighlight the selected tile
-                selectedPlayerTileBtn.setEnabled(false); // disable the selected tile
-                selectedPlayerChar = null;
-                selectedPlayerTileBtn = null;
-            }
-        }
-    }
-
-    /**
-     * Handles the event when the skip turn button is clicked.
+     * This method is called when the user clicks the "Skip Turn" button.
      */
     public void onSkipTurnClicked() {
-        if (model.isFirstTurn()){
-            model.nextTurn(); // to send a notif
-            return;
-        }
-
         model.restorePlayerTiles();
-        reenablePlayerTiles();
-        model.nextTurn();
-        handleAITurn();
-        if (model.isTimerMode()) {
-            resetTimer();
-        }
+        model.nextTurn(); // Skip to the next player’s turn
     }
 
     /**
-     * Handles the event when the submit button is clicked.
+     * This method is called when the user clicks the "Submit" button.
      */
+    @Override
     public void onSubmitButtonClicked() {
-        if (model.submitWord()) {
+        submitTurn();
+    }
+
+    /**
+     * This method is called when the user clicks the "Shuffle" button.
+     */
+    public void submitTurn() {
+        boolean success = model.submitWord();
+
+        if (success) {
             if (model.isFirstTurn() && !model.isCenterCovered()) {
+                view.showMessage("First word must be placed covering the center square.");
                 model.restorePlayerTiles();
             } else {
+                view.showMessage("Word accepted! Your score has been updated.");
                 model.nextTurn(); // Move to the next player
-                reenablePlayerTiles();
                 if (model.isGameOver()) {
                     endGame();
-                } else {
-                    handleAITurn();
                 }
             }
-            if (model.isTimerMode()) {
-                resetTimer();
-            }
+        } else {
+            view.showMessage("Invalid word! Please try again.");
+            model.restorePlayerTiles();
         }
     }
 
-    /**
-     * Handles the event when the undo button is clicked.
-     */
-    public void onUndoButtonClicked() {
-        Player currentPlayer = model.getCurrentPlayer();
-        Position lastPositionPlayed = currentPlayer.history.removeLast();
-        Character lastTilePlayed = model.removeCurrentPlacementTile(lastPositionPlayed);
-        currentPlayer.undoHistory.add(lastPositionPlayed);
-        model.removeTileFromBoard(lastPositionPlayed.row, lastPositionPlayed.col);
-        currentPlayer.addTile(lastTilePlayed);
-        view.enableTile(lastTilePlayed);
-    }
 
     /**
-     * Handles the event when the redo button is clicked.
-     */
-    public void onRedoButtonClicked() {
-        Player currentPlayer = model.getCurrentPlayer();
-        Position lastUndoPosition = currentPlayer.undoHistory.removeLast();
-        Character lastUndoTile = currentPlayer.tiles.removeLast();
-        currentPlayer.history.add(lastUndoPosition);
-        model.addTileToBoard(lastUndoTile, lastUndoPosition.row, lastUndoPosition.col);
-        view.disableTile(lastUndoTile);
-    }
-
-    /**
-     * Re-enables the player tiles.
-     */
-    private void reenablePlayerTiles() {
-        for (JButton tileButton : view.getPlayerTiles()) {
-            tileButton.setEnabled(true);
-            tileButton.setBackground(null);
-        }
-    }
-
-    /**
-     * Ends the game and displays the final scores.
+     * This method is called when the game is over.
      */
     private void endGame() {
         List<Player> players = model.getPlayers();
         StringBuilder finalScores = new StringBuilder("Game Over! Final Scores:\n");
         for (Player player : players) {
-            finalScores.append(player.getName()).append(": ").append(player.getScore()).append("\n");
+            finalScores.append(player.getName())
+                    .append(": ")
+                    .append(player.getScore())
+                    .append("\n");
         }
         view.showMessage(finalScores.toString());
     }
 
+
     /**
-     * Handles the AI player's turn.
+     * This method is called when the game is started.
      */
-    private void handleAITurn() {
-        if (model.isFirstTurn()) {
-            return;
-        }
-        // silence pop up messages.
-        model.toggleDisplayMessages();
-
-        while (model.getCurrentPlayer().isAi()) {
-            AiPlayer aiPlayer = (AiPlayer) model.getCurrentPlayer();
-            if (!(aiPlayer.play())) {
-                view.showMessage(aiPlayer.getName() + " skipped their turn.");
-            }
-            model.nextTurn();
-            reenablePlayerTiles();
-            if (model.isGameOver()) {
-                endGame();
-                break;
-            }
-        }
-
-        // un silence pop up messages.
-        model.toggleDisplayMessages();
+    public void startGame() {
+        onModelChanged();
     }
 
-
-    private void startTimer() {
-        Timer timer = new Timer();
-        timerTask = new TimerTask() {
-            int timeRemaining = 30;
-
-            @Override
-            public void run() {
-                if (timeRemaining > 0) {
-                    timeRemaining--;
-                    SwingUtilities.invokeLater(() -> view.getTimerLabel().setText("Timer: " + timeRemaining + "s"));
-                } else {
-                    SwingUtilities.invokeLater(() -> {
-                        view.showMessage("Time's up! Next player's turn.");
-                        onSkipTurnClicked();
-                    });
-                    cancel();
-                }
-            }
-        };
-        timer.scheduleAtFixedRate(timerTask, 0, 1000);
-    }
-
-    private void resetTimer() {
-        if (timerTask != null) {
-            timerTask.cancel();
-        }
-        startTimer();
+    /**
+     * This method is called when the model is changed.
+     */
+    @Override
+    public void onModelChanged() {
+        view.updateBoard(model.getBoardState());
+        view.updateTileRack(model.getCurrentPlayer().getTiles());
+        String status = "Current player: " + model.getCurrentPlayer().getName() +
+                " | Score: " + model.getCurrentPlayer().getScore();
+        view.updateStatus(status);
     }
 }
