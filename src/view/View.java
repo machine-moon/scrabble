@@ -4,14 +4,11 @@ package view;
 import model.Model;
 import model.ModelObserver;
 import model.Player;
-import model.Position;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
 
 /**
  * The View class represents the GUI of the Scrabble game.
@@ -22,21 +19,13 @@ public class View extends JFrame implements ModelObserver {
     private JPanel boardPanel;
     private JPanel tileRackPanel;
     private JLabel statusLabel;
-    private JLabel timerLabel;
-    private JPanel statusPanel;
-
-
     private List<JButton> playerTiles;
 
 
     private JButton selectedTileButton; //del this?
     private JButton submitButton;
     private JButton skipTurnButton;
-    private JButton undoButton;
-    private JButton redoButton;
 
-    private JButton saveButton;
-    private JButton loadButton;
 
     // stuff the update() method will update.
     private int boardSize; // init update method
@@ -84,25 +73,16 @@ public class View extends JFrame implements ModelObserver {
         }
 
 
+        add(boardPanel, BorderLayout.CENTER);
+
         // Tile rack panel
         tileRackPanel = new JPanel(new FlowLayout());
         add(tileRackPanel, BorderLayout.SOUTH);
 
-
         // Status label
         statusLabel = new JLabel("Welcome to Scrabble!");
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-        // Timer label
-        timerLabel = new JLabel();
-        timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-        // Status panel
-        statusPanel = new JPanel(new GridLayout(2, 1));
-        statusPanel.add(statusLabel);
-        statusPanel.add(timerLabel);
-        add(statusPanel, BorderLayout.NORTH);
-
+        add(statusLabel, BorderLayout.NORTH);
 
         // Tile buttons
         playerTiles = new ArrayList<>();
@@ -117,42 +97,14 @@ public class View extends JFrame implements ModelObserver {
         // Selected tile button
         selectedTileButton = null;
 
-        // Right Panel
-        JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new GridLayout(3, 1));
-        add(rightPanel, BorderLayout.EAST);
-
         // Submit button
         submitButton = new JButton("Submit");
-        rightPanel.add(submitButton);
-
-        // Undo button
-        undoButton = new JButton("Undo");
-        rightPanel.add(undoButton);
-
-        // Redo button
-        redoButton = new JButton("Redo");
-        rightPanel.add(redoButton);
-
-        // --------------------------------------
-
-        // Left Panel
-        JPanel leftPanel = new JPanel();
-        leftPanel.setLayout(new GridLayout(3, 1));
-        add(leftPanel, BorderLayout.WEST);
 
         // Skip turn button
         skipTurnButton = new JButton("Skip Turn");
-        leftPanel.add(skipTurnButton);
 
-        // Save Button
-        saveButton = new JButton("Save Game");
-        leftPanel.add(saveButton);
-
-        // Load Button
-        loadButton = new JButton("Load Game");
-        leftPanel.add(loadButton);
-
+        add(submitButton, BorderLayout.EAST);
+        add(skipTurnButton, BorderLayout.WEST);
 
         // The game isn't actually ready till the controller says so, via the update() method
         setVisible(false);
@@ -211,24 +163,6 @@ public class View extends JFrame implements ModelObserver {
     }
 
     /**
-     * Returns the save button.
-     *
-     * @return the save button
-     */
-    public JButton getSaveButton() {
-        return saveButton;
-    }
-
-    /**
-     * Returns the load button.
-     *
-     * @return the load button
-     */
-    public JButton getLoadButton() {
-        return loadButton;
-    }
-
-    /**
      * Returns the list of player tiles.
      *
      * @return the list of player tiles
@@ -268,55 +202,42 @@ public class View extends JFrame implements ModelObserver {
     }
 
     /**
-     * Returns the undo button
-     *
-     * @return the undo button
-     */
-    public JButton getUndoButton() {
-        return undoButton;
-    }
-
-    /**
-     * Returns the redo button
-     *
-     * @return the redo button
-     */
-    public JButton getRedoButton() {
-        return redoButton;
-    }
-
-    /**
      * Updates the game board with the given board state.
      *
      * @param board the board state to update
      */
-    public void updateBoard(char[][] board, Model m) {
-        // Assume you have a reference to the model:
-        Set<Position> TW = m.getTripleWordScore();
-        Set<Position> DW = m.getDoubleWordScore();
-        Set<Position> TL = m.getTripleLetterScore();
-        Set<Position> DL = m.getDoubleLetterScore();
-
+    public void updateBoard(char[][] board) {
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
                 JButton cell = getBoardCellButton(row, col);
                 char c = board[row][col];
                 cell.setText(c == '\0' ? "" : String.valueOf(c));
+                // Reapply center tile styling to maintain its special appearance
 
-                Position pos = new Position(row, col);
-                if (TW.contains(pos)) {
-                    cell.setBackground(DARK_RED);
-                } else if (DW.contains(pos)) {
-                    cell.setBackground(DARK_PINK);
-                } else if (TL.contains(pos)) {
-                    cell.setBackground(DARK_BLUE);
-                } else if (DL.contains(pos)) {
-                    cell.setBackground(DARK_CYAN);
-                } else if (row == center && col == center) {
-                    cell.setBackground(DARK_ORANGE);
+                if ((row == 0 && (col == 0 || col == 7 || col == 14)) ||
+                        (row == 7 && (col == 0 || col == 14)) ||
+                        (row == 14 && (col == 0 || col == 7 || col == 14))) {
+                    cell.setBackground(DARK_RED); // Triple Word Score
+                } else if ((row == col && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13)) ||
+                        ((row + col == 14) && (row == 1 || row == 2 || row == 3 || row == 4 || row == 10 || row == 11 || row == 12 || row == 13))) {
+                    cell.setBackground(DARK_PINK); // Double Word Score
+                } else if (((row == 1 || row == 13) && (col == 5 || col == 9)) ||
+                        ((row == 5 || row == 9) && (col == 1 || col == 13)) ||
+                        (row == 5 && col == 5) || (row == 5 && col == 9) ||
+                        (row == 9 && col == 5) || (row == 9 && col == 9)) {
+                    cell.setBackground(DARK_BLUE); // Triple Letter Score
+                } else if (((row == 0 || row == 14) && (col == 3 || col == 11)) ||
+                        ((row == 2 || row == 12) && (col == 6 || col == 8)) ||
+                        ((row == 3 || row == 11) && (col == 0 || col == 14)) ||
+                        ((row == 6 || row == 8) && (col == 2 || col == 12)) ||
+                        ((row == 6 || row == 8) && (col == 6 || col == 8))) {
+                    cell.setBackground(DARK_CYAN); // Double Letter Score
+                } else if (row == 7 && col == 7) {
+                    cell.setBackground(DARK_ORANGE); // Center Tile
                 } else {
-                    cell.setBackground(Color.WHITE);
+                    cell.setBackground(Color.WHITE); // Regular Tile
                 }
+
             }
         }
         boardPanel.revalidate();
@@ -415,24 +336,9 @@ public class View extends JFrame implements ModelObserver {
             case "gameOver":
                 handleGameOver();
                 break;
-            case "resetTimer":
-                handleResetTimer();
-                break;
-            case "timerModeChanged":
-                handleTimerModeChanged(m);
-                break;
             default:
                 break;
         }
-    }
-
-
-    private void handleResetTimer() {
-        timerLabel.setText("Timer: 30s");
-    }
-
-    private void handleTimerModeChanged(Model m) {
-        timerLabel.setVisible(m.isTimerMode());
     }
 
     /**
@@ -446,7 +352,6 @@ public class View extends JFrame implements ModelObserver {
         this.currentPlayer = m.getCurrentPlayer();
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
         updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
-        updateBoard(m.getBoardState(), m);
         setVisible(true);
     }
 
@@ -456,7 +361,7 @@ public class View extends JFrame implements ModelObserver {
      * @param m the model to update
      */
     private void handleBoardUpdate(Model m) {
-        updateBoard(m.getBoardState(), m);
+        updateBoard(m.getBoardState());
     }
 
     /**
@@ -466,7 +371,7 @@ public class View extends JFrame implements ModelObserver {
      */
     private void handleCenterNotCovered(Model m) {
         showMessage("First word must be placed covering the center square.");
-        updateBoard(m.getBoardState(), m);
+        updateBoard(m.getBoardState());
         updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
     }
@@ -478,7 +383,7 @@ public class View extends JFrame implements ModelObserver {
      */
     private void handleInvalidWord(Model m) {
         showMessage("Invalid word! Please try again.");
-        updateBoard(m.getBoardState(), m);
+        updateBoard(m.getBoardState());
         updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
     }
@@ -490,7 +395,7 @@ public class View extends JFrame implements ModelObserver {
      */
     private void handleNoWordFound(Model m) {
         showMessage("No new word found! Please try again.");
-        updateBoard(m.getBoardState(), m);
+        updateBoard(m.getBoardState());
 
     }
 
@@ -501,7 +406,7 @@ public class View extends JFrame implements ModelObserver {
      */
     private void handleAdjacentWord(Model m) {
         showMessage("Word not adjacent! Please try again.");
-        updateBoard(m.getBoardState(), m);
+        updateBoard(m.getBoardState());
 
     }
 
@@ -512,7 +417,7 @@ public class View extends JFrame implements ModelObserver {
      */
     private void handleWordSubmitted(Model m) {
         showMessage("Word accepted! Your score has been updated.");
-        updateBoard(m.getBoardState(), m);
+        updateBoard(m.getBoardState());
         updateStatus(m.getCurrentPlayer(), m.getRemainingTiles());
         loadPlayerTiles(m.getCurrentPlayer().getTiles());
     }
@@ -546,37 +451,5 @@ public class View extends JFrame implements ModelObserver {
         setVisible(false);
     }
 
-    /**
-     * Returns the selected tile button.
-     *
-     * @return the selected tile button
-     */
-    public JLabel getTimerLabel() {
-        return timerLabel;
-    }
 
-    /**
-     * Enables a player tile
-     */
-    public void enableTile(Character c) {
-        for (JButton button : playerTiles) {
-            if (button.getText().equals(c.toString()) && !button.isEnabled()) {
-                button.setEnabled(true);
-                button.setBackground(null);
-                break;
-            }
-        }
-    }
-
-    /**
-     * Disables a player tile
-     */
-    public void disableTile(Character c) {
-        for (JButton button : playerTiles) {
-            if (button.getText().equals(c.toString()) && button.isEnabled()) {
-                button.setEnabled(false);
-                button.setBackground(Color.cyan);
-            }
-        }
-    }
 }

@@ -1,20 +1,16 @@
 package model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
  * Represents a player in the game.
  */
-public class Player implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Player {
+
     private String name;
     private int score;
     public List<Character> tiles;
-    public List<Position> undoHistory;
-    public List<Position> history;
 
     /**
      * Constructs a Player with the specified name.
@@ -25,8 +21,6 @@ public class Player implements Serializable {
         this.name = name;
         this.score = 0;
         this.tiles = new ArrayList<>();
-        this.undoHistory = new ArrayList<>();
-        this.history = new ArrayList<>();
     }
 
     /**

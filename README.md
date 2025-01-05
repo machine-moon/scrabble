@@ -1,5 +1,5 @@
 # Scrabble Game - Team 11 Project
-
+## IMPORTANT NOTE: JAR ISNT RUNNING ON MY END DUE IN 1 MINUTE, JUST RUN GAME.GAME OUR MAIN IS THERE OUR PROGRAM WORKS THANKS :D
 ## Authors
 - Tarek Ibrahim, Arjun Pathak, Manit Jawa, Mithushan Ravichandramohan
 - SYSC 3110 - Fall 2024
@@ -18,7 +18,7 @@ The following are detailed steps to run the Scrabble game.
 ### Downloading Scrabble from GitHub and Running the Game
 1. Clone the repository or extract the archive to your desired location.
 2. Open the project in your preferred Java IDE or navigate to the project directory in your command line.
-3. Run `Game.java` to start the game (e.g., in the command line, execute `java Game`).
+3. Run `Main.java` to start the game (e.g., in the command line, execute `java Main`).
 4. The game Scrabble is now running and can be played by the players. 
 
 ## Usage - Playing the Game
@@ -27,20 +27,11 @@ The following are detailed steps to run the Scrabble game.
 The rules of the game can be found here: [Scrabble Rules](https://en.wikipedia.org/wiki/Scrabble)
 
 ### Gameplay
-1. Enter board size, number of players, number of ai players. 
-2. If you would like a timer for each turn, check the timer mode option. (BONUS)
-3. Select a board configuration from the different kinds of board configurations available.
-4. Enter names for each player and click OK.
-5. The game is now loaded. At the top, the current player and score is displayed.
-6. If you would like to load a previously saved game, click on Load Game.
-7. Click on the letter you want to place on the board, then click the tile where it should be placed (The game must start with the word placed in the center, marked in orange).
-8. If you would like to undo a letter placement, click on Undo.
-9. If you would like to redo a letter placement, click on Redo.
-10. If you would like to skip your turn, click on Skip Turn. 
-11. Hit submit to submit the word once you are satisfied with word placement.
-12. The score of the current player will be displayed on top.
-13. Keep playing until a winner is found.
-14. View the Images folder for screenshots of gameplay.
+1. Click on the letter you want to place on the board, then click the tile where it should be placed (The game must start with the word placed in the center, marked in orange).
+2. Hit submit to submit the word or skip to skip your turn.
+3. The score of the current player will be displayed on top.
+4. Keep playing until a winner is found.
+5. View the Images folder for screenshots of gameplay.
 
 ## Project Structure
 
@@ -52,7 +43,6 @@ The rules of the game can be found here: [Scrabble Rules](https://en.wikipedia.o
 
 - src/controller
 - **Controller.java**: Acts as an intermediary between the `Model` and the `View`, processing player moves, handling user interactions, and updating the game state.
-- **ControllerTests**: Tests for the controller class
 
 - src/model
 - **AiPlayer.java**: Represents an AI player; extends the Player class with additional AI-specific logic.
@@ -63,7 +53,6 @@ The rules of the game can be found here: [Scrabble Rules](https://en.wikipedia.o
 - **Position.java**: Helper class for handling positions on the game board, used in tile placement.
 - **TileBag.java**: Manages the pool of tiles available for drawing by players, implementing the tile drawing and tracking remaining tiles.
 - **wordlist.txt**: Contains a list of valid words for the Scrabble game, used by the `Model` to validate word submissions.
-- **board_config.xml, board_invalid.xml, board_valid.xml**: Different configurations of the board that can be loaded into the game.
 
 - src/view
 - **View.java**: The graphical user interface (GUI) for the game, displaying the board status, player points, and messages, and updating automatically on `Model` changes.
@@ -83,12 +72,6 @@ The rules of the game can be found here: [Scrabble Rules](https://en.wikipedia.o
 - **New AI popup**: Asks for the number of AI players.
 - **Premium Squares**: Introduced premium squares to enhance strategic gameplay.
 - **Improved Scoring Logic**: Enhanced the accuracy and efficiency of scoring calculations.
-- **Option to Enter Board Size**: Custom board size can now be entered.
-- **Option to Enter Number of Players**: Number of players can be entered.
-- **Select Board Configuration**: Custom board configurations can now be selected.
-- **BONUS: Timer Mode**: Timer mode can be enabled that puts a timer for each player's turn.
-- **Undo, Redo**: Undo and Redo is now available. Players can undo and redo their letter placement.
-- **Save Game, Load Game**: Game can be saved and loaded later now.
 
 ## Technologies Used
 
@@ -115,40 +98,34 @@ The rules of the game can be found here: [Scrabble Rules](https://en.wikipedia.o
     view  /
     ```
   This was done to improve code coherence and maintainability after a team member made conflicting changes in the master branch.
-- Several new features were added:
-- **Option to Enter Board Size**: Custom board size can now be entered.
-- **Option to Enter Number of Players**: Number of players can be entered.
-- **Select Board Configuration**: Custom board configurations can now be selected.
-- **BONUS: Timer Mode**: Timer mode can be enabled that puts a timer for each player's turn.
-- **Undo, Redo**: Undo and Redo is now available. Players can undo and redo their letter placement.
-- **Save Game, Load Game**: Game can be saved and loaded later now.
-
-- BONUS: Timer mode was chosen as bonus and tests for timer are available in controller tests.
 
 ## Contributions
 
 - **Mithushan Ravichandramohan**
   - Auto-generated UML diagrams for project structure visualization.
+  - Implemented last minute unit tests.
   
 - **Arjun Pathak**
-  - Added custom board display, validation and their tests.
+  - Integrated premium squares functionality within the model and updated the view to highlight them.
+  - Enhanced scoring functionality related to premium squares.
 
 - **Manit Jawa**
+  - Reviewed and confirmed game rules regarding blank tiles in the tile bag.
+  - Collaborated with Arjun on model adjustments concerning blank tiles.
   - Conducted app testing and documented findings.
-  - Added Undo, Redo feature and their tests
 
 - **Tarek Ibrahim**
-  - Added a main menu/ui
-  - Added Save/Load Functionality and thier tests.
-  - integrated everyones code.
-  
+  - Designed and fully implemented Main/Game, Controller, View, and bug fixes.
+  - Conducted thorough app testing and documented bugs for comparison with previous versions.
+  - Developed AI implementation to allow for dynamic gameplay with AI players.
+  - Created and updated comprehensive Java documentation, including `@param` and `@return` annotations.
+  - Ensured the proper functionality of the AI class.
+  - Prepared the project for final submission.
+
 ## Known Bugs
-  - Ai plays on top of premium squares
 
-## BONUS:
-  - you can find bonus tests in controllerTests
-  - we ALL did bonus together.
-
+- After placing player tiles, the highlighted CYAN color stays sometimes.
+- If a player doesn't play in the center on the first turn, the model rejects the input as the player must start from the center; the player doesn't get the played tiles back, though they receive random new ones as replacements.
 
 ## License
 

@@ -1,295 +1,75 @@
 package model;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 
 /**
  * Represents the game model.
  */
-public class Model implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-
+public class Model {
     private static Model instance;
 
     private final char[][] board;
     private final List<Player> players;
     private int currentPlayerIndex;
     private final TileBag tileBag;
-    private transient List<ModelObserver> observers; // Marked as transient
+    private final List<ModelObserver> observers;
     private final Set<String> wordlist;
     private final int boardSize;
     private final Map<Position, Character> currentTurnPlacements;
     private boolean isFirstTurn;
-    private boolean displayMessages = true; // whether to notify observers
-    private boolean timerMode;
+    private boolean displayMessages = true; // weather or not to notify observers
 
+    private final Set<Position> TRIPLE_WORD_SCORE = Set.of(
+            new Position(0, 0), new Position(0, 7), new Position(0, 14),
+            new Position(7, 0), new Position(7, 14),
+            new Position(14, 0), new Position(14, 7), new Position(14, 14)
+    );
 
-    private final Set<Position> TRIPLE_WORD_SCORE = new HashSet<>();
-    private final Set<Position> DOUBLE_WORD_SCORE = new HashSet<>();
-    private final Set<Position> TRIPLE_LETTER_SCORE = new HashSet<>();
-    private final Set<Position> DOUBLE_LETTER_SCORE = new HashSet<>();
+    private final Set<Position> DOUBLE_WORD_SCORE = Set.of(
+            new Position(1, 1), new Position(2, 2), new Position(3, 3), new Position(4, 4),
+            new Position(10, 10), new Position(11, 11), new Position(12, 12), new Position(13, 13),
+            new Position(1, 13), new Position(2, 12), new Position(3, 11), new Position(4, 10),
+            new Position(10, 4), new Position(11, 3), new Position(12, 2), new Position(13, 1)
+    );
+
+    private final Set<Position> TRIPLE_LETTER_SCORE = Set.of(
+            new Position(1, 5), new Position(1, 9),
+            new Position(5, 1), new Position(5, 5), new Position(5, 9), new Position(5, 13),
+            new Position(9, 1), new Position(9, 5), new Position(9, 9), new Position(9, 13),
+            new Position(13, 5), new Position(13, 9)
+    );
+
+    private final Set<Position> DOUBLE_LETTER_SCORE = Set.of(
+            new Position(0, 3), new Position(0, 11),
+            new Position(2, 6), new Position(2, 8),
+            new Position(3, 0), new Position(3, 14), new Position(3, 11),
+            new Position(6, 2), new Position(6, 6), new Position(6, 8), new Position(6, 12),
+            new Position(8, 2), new Position(8, 6), new Position(8, 8), new Position(8, 12),
+            new Position(11, 0), new Position(11, 3), new Position(11, 11), new Position(11, 14),
+            new Position(12, 6), new Position(12, 8),
+            new Position(14, 3), new Position(14, 11)
+    );
+
 
     /**
      * Initializes the game model with the specified board size.
      *
-     * @param boardSize       the size of the board (e.g., 15 for a 15x15 board)
-     * @param boardConfigPath the path to the board configuration XML file
+     * @param boardSize the size of the board (e.g., 15 for a 15x15 board)
      */
-    private Model(int boardSize, String boardConfigPath) {
+    private Model(int boardSize) {
         this.boardSize = boardSize;
         this.board = new char[boardSize][boardSize];
         this.players = new ArrayList<>();
         this.currentPlayerIndex = 0;
         this.tileBag = new TileBag();
         this.observers = new ArrayList<>();
-        this.wordlist = loadWordList("src/model/wordlist.txt");
+        this.wordlist = loadWordList("src/model/words_alpha.txt");
         this.currentTurnPlacements = new HashMap<>();
         this.isFirstTurn = true;
-        loadBoardConfigFromXML(boardConfigPath);
-
-    }
-
-    /**
-     * Loads the board configuration from an XML file.
-     * If the file is invalid or not found, default configurations are loaded instead.
-     *
-     * @param xmlFileName the path to the XML configuration file
-     */
-    void loadBoardConfigFromXML(String xmlFileName) {
-        File xmlFile = new File(xmlFileName);
-        if (!xmlFile.exists()) {
-            System.out.println("XML configuration file not found. Using default configuration.");
-            loadDefaultPremiumSquares();
-            return;
-        }
-
-        try {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(xmlFile);
-
-            doc.getDocumentElement().normalize();
-
-            // Validate the presence of <size>
-            NodeList sizeList = doc.getElementsByTagName("size");
-            if (sizeList.getLength() == 0) {
-                System.out.println("No <size> element found in XML. Using defaults.");
-                loadDefaultPremiumSquares();
-                return;
-            }
-
-            int xmlSize = Integer.parseInt(sizeList.item(0).getTextContent().trim());
-            if (xmlSize != this.boardSize) {
-                System.out.println("Warning: XML board size (" + xmlSize + ") does not match expected Model board size (" + boardSize + "). Using defaults.");
-                loadDefaultPremiumSquares();
-                return;
-            }
-
-            // Validate the presence of <premiumSquares>
-            NodeList premiumSquaresList = doc.getElementsByTagName("premiumSquares");
-            if (premiumSquaresList.getLength() == 0) {
-                System.out.println("No <premiumSquares> element found. Using defaults.");
-                loadDefaultPremiumSquares();
-                return;
-            }
-
-            NodeList squares = doc.getElementsByTagName("square");
-            // Temporary sets to hold data before we finalize them
-            Set<Position> tempTW = new HashSet<>();
-            Set<Position> tempDW = new HashSet<>();
-            Set<Position> tempTL = new HashSet<>();
-            Set<Position> tempDL = new HashSet<>();
-
-            boolean validationFailed = false;
-
-            for (int i = 0; i < squares.getLength(); i++) {
-                Element squareElement = (Element) squares.item(i);
-                String rowStr = squareElement.getAttribute("row");
-                String colStr = squareElement.getAttribute("col");
-                String type = squareElement.getAttribute("type");
-
-                // Validate attributes
-                if (rowStr.isEmpty() || colStr.isEmpty() || type.isEmpty()) {
-                    System.out.println("Invalid square definition: Missing row/col/type. Using defaults.");
-                    validationFailed = true;
-                    break;
-                }
-
-                int row = Integer.parseInt(rowStr);
-                int col = Integer.parseInt(colStr);
-
-                // Check range
-                if (row < 0 || row >= boardSize || col < 0 || col >= boardSize) {
-                    System.out.println("Square (" + row + "," + col + ") is out of board range. Using defaults.");
-                    validationFailed = true;
-                    break;
-                }
-
-                // Check type validity
-                Position pos = new Position(row, col);
-                switch (type) {
-                    case "TW":
-                        // Check no overlap
-                        if (tempDW.contains(pos) || tempTL.contains(pos) || tempDL.contains(pos) || tempTW.contains(pos)) {
-                            System.out.println("Square (" + row + "," + col + ") defined multiple times. Using defaults.");
-                            validationFailed = true;
-                        } else {
-                            tempTW.add(pos);
-                        }
-                        break;
-                    case "DW":
-                        if (tempTW.contains(pos) || tempTL.contains(pos) || tempDL.contains(pos) || tempDW.contains(pos)) {
-                            System.out.println("Square (" + row + "," + col + ") defined multiple times. Using defaults.");
-                            validationFailed = true;
-                        } else {
-                            tempDW.add(pos);
-                        }
-                        break;
-                    case "TL":
-                        if (tempTW.contains(pos) || tempDW.contains(pos) || tempDL.contains(pos) || tempTL.contains(pos)) {
-                            System.out.println("Square (" + row + "," + col + ") defined multiple times. Using defaults.");
-                            validationFailed = true;
-                        } else {
-                            tempTL.add(pos);
-                        }
-                        break;
-                    case "DL":
-                        if (tempTW.contains(pos) || tempDW.contains(pos) || tempTL.contains(pos) || tempDL.contains(pos)) {
-                            System.out.println("Square (" + row + "," + col + ") defined multiple times. Using defaults.");
-                            validationFailed = true;
-                        } else {
-                            tempDL.add(pos);
-                        }
-                        break;
-                    default:
-                        System.out.println("Unknown premium type: " + type + ". Using defaults.");
-                        validationFailed = true;
-                        break;
-                }
-
-                if (validationFailed) {
-                    break;
-                }
-            }
-
-            if (validationFailed) {
-                loadDefaultPremiumSquares();
-            } else {
-                // Assign to actual sets only after successful validation
-                TRIPLE_WORD_SCORE.clear();
-                DOUBLE_WORD_SCORE.clear();
-                TRIPLE_LETTER_SCORE.clear();
-                DOUBLE_LETTER_SCORE.clear();
-
-                TRIPLE_WORD_SCORE.addAll(tempTW);
-                DOUBLE_WORD_SCORE.addAll(tempDW);
-                TRIPLE_LETTER_SCORE.addAll(tempTL);
-                DOUBLE_LETTER_SCORE.addAll(tempDL);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Failed to parse or validate XML. Using defaults.");
-            loadDefaultPremiumSquares();
-        }
-    }
-
-    /**
-     * Loads default premium squares if validation fails or XML not found.
-     */
-    private void loadDefaultPremiumSquares() {
-        // Clear existing sets
-        TRIPLE_WORD_SCORE.clear();
-        DOUBLE_WORD_SCORE.clear();
-        TRIPLE_LETTER_SCORE.clear();
-        DOUBLE_LETTER_SCORE.clear();
-
-        // Populate TRIPLE_WORD_SCORE
-        TRIPLE_WORD_SCORE.add(new Position(0, 0));
-        TRIPLE_WORD_SCORE.add(new Position(0, 7));
-        TRIPLE_WORD_SCORE.add(new Position(0, 14));
-        TRIPLE_WORD_SCORE.add(new Position(7, 0));
-        TRIPLE_WORD_SCORE.add(new Position(7, 14));
-        TRIPLE_WORD_SCORE.add(new Position(14, 0));
-        TRIPLE_WORD_SCORE.add(new Position(14, 7));
-        TRIPLE_WORD_SCORE.add(new Position(14, 14));
-
-        // Populate DOUBLE_WORD_SCORE
-        DOUBLE_WORD_SCORE.add(new Position(1, 1));
-        DOUBLE_WORD_SCORE.add(new Position(2, 2));
-        DOUBLE_WORD_SCORE.add(new Position(3, 3));
-        DOUBLE_WORD_SCORE.add(new Position(4, 4));
-        DOUBLE_WORD_SCORE.add(new Position(10, 10));
-        DOUBLE_WORD_SCORE.add(new Position(11, 11));
-        DOUBLE_WORD_SCORE.add(new Position(12, 12));
-        DOUBLE_WORD_SCORE.add(new Position(13, 13));
-        DOUBLE_WORD_SCORE.add(new Position(1, 13));
-        DOUBLE_WORD_SCORE.add(new Position(2, 12));
-        DOUBLE_WORD_SCORE.add(new Position(3, 11));
-        DOUBLE_WORD_SCORE.add(new Position(4, 10));
-        DOUBLE_WORD_SCORE.add(new Position(10, 4));
-        DOUBLE_WORD_SCORE.add(new Position(11, 3));
-        DOUBLE_WORD_SCORE.add(new Position(12, 2));
-        DOUBLE_WORD_SCORE.add(new Position(13, 1));
-
-        // Populate TRIPLE_LETTER_SCORE
-        TRIPLE_LETTER_SCORE.add(new Position(1, 5));
-        TRIPLE_LETTER_SCORE.add(new Position(1, 9));
-        TRIPLE_LETTER_SCORE.add(new Position(5, 1));
-        TRIPLE_LETTER_SCORE.add(new Position(5, 5));
-        TRIPLE_LETTER_SCORE.add(new Position(5, 9));
-        TRIPLE_LETTER_SCORE.add(new Position(5, 13));
-        TRIPLE_LETTER_SCORE.add(new Position(9, 1));
-        TRIPLE_LETTER_SCORE.add(new Position(9, 5));
-        TRIPLE_LETTER_SCORE.add(new Position(9, 9));
-        TRIPLE_LETTER_SCORE.add(new Position(9, 13));
-        TRIPLE_LETTER_SCORE.add(new Position(13, 5));
-        TRIPLE_LETTER_SCORE.add(new Position(13, 9));
-
-        // Populate DOUBLE_LETTER_SCORE
-        DOUBLE_LETTER_SCORE.add(new Position(0, 3));
-        DOUBLE_LETTER_SCORE.add(new Position(0, 11));
-        DOUBLE_LETTER_SCORE.add(new Position(2, 6));
-        DOUBLE_LETTER_SCORE.add(new Position(2, 8));
-        DOUBLE_LETTER_SCORE.add(new Position(3, 0));
-        DOUBLE_LETTER_SCORE.add(new Position(3, 14));
-        DOUBLE_LETTER_SCORE.add(new Position(6, 2));
-        DOUBLE_LETTER_SCORE.add(new Position(6, 6));
-        DOUBLE_LETTER_SCORE.add(new Position(6, 8));
-        DOUBLE_LETTER_SCORE.add(new Position(6, 12));
-        DOUBLE_LETTER_SCORE.add(new Position(8, 2));
-        DOUBLE_LETTER_SCORE.add(new Position(8, 6));
-        DOUBLE_LETTER_SCORE.add(new Position(8, 8));
-        DOUBLE_LETTER_SCORE.add(new Position(8, 12));
-        DOUBLE_LETTER_SCORE.add(new Position(11, 0));
-        DOUBLE_LETTER_SCORE.add(new Position(11, 3));
-        DOUBLE_LETTER_SCORE.add(new Position(11, 11));
-        DOUBLE_LETTER_SCORE.add(new Position(11, 14));
-        DOUBLE_LETTER_SCORE.add(new Position(12, 6));
-        DOUBLE_LETTER_SCORE.add(new Position(12, 8));
-        DOUBLE_LETTER_SCORE.add(new Position(14, 3));
-        DOUBLE_LETTER_SCORE.add(new Position(14, 11));
-    }
-
-
-    /**
-     * Custom serialization logic for transient field observers.
-     *
-     * @param in the input stream
-     * @throws IOException if an I/O error occurs
-     */
-    @Serial
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        this.observers = new ArrayList<>(); // Reinitialize transient field
     }
 
     /**
@@ -298,9 +78,9 @@ public class Model implements Serializable {
      * @param boardSize the size of the board
      * @return the singleton instance of the model
      */
-    public static Model getInstance(int boardSize, String boardConfigPath) {
+    public static Model getInstance(int boardSize) {
         if (instance == null) {
-            instance = new Model(boardSize, boardConfigPath);
+            instance = new Model(boardSize);
         }
         return instance;
     }
@@ -381,7 +161,6 @@ public class Model implements Serializable {
         }
 
         board[row][col] = tile;
-        getCurrentPlayer().history.add(new Position(row, col));
         currentTurnPlacements.put(new Position(row, col), tile);
         getCurrentPlayer().removeTile(tile);
         notifyObservers("tilePlaced");
@@ -406,18 +185,16 @@ public class Model implements Serializable {
         if (!isFirstTurn && !hasAdjacentTiles()) {
             restorePlayerTiles(); // Undo invalid move
             notifyObservers("noAdjacentTiles");
-            System.out.println("No adjacent tiles");
             return false;
         }
 
 
         List<String> newWords = getAllNewWords();
-        //System.out.println(newWords);
+        System.out.println(newWords);
         if (newWords.isEmpty()) {
             //revertPlacements();  // should this be here? adding it
             restorePlayerTiles();
             notifyObservers("noWordFound");
-            System.out.println("No words found");
             return false; // No tiles placed
         }
 
@@ -427,39 +204,33 @@ public class Model implements Serializable {
                 //revertPlacements();  // should this be here? adding it
                 restorePlayerTiles();
                 notifyObservers("invalidWord");
-                System.out.println("Invalid word: " + word);
                 return false; // At least one word is invalid
             }
         }
 
-        // Check if this was the first turn and validate center coverage
-        if (isFirstTurn) {
-            if (!coversCenter()) {
-                // Invalid first move; revert placements
-
-                //revertPlacements();
-                restorePlayerTiles();
-                clearPlacements();
-                notifyObservers("centerNotCovered");
-                System.out.println("Center not covered");
-
-                return false;
-            }
-            isFirstTurn = false; // First turn completed
-        }
-
         // All words are valid, calculate total score
         int totalScore = calculateTotalScore(newWords);
-
-
         getCurrentPlayer().addScore(totalScore);
 
         // After validation, replenish player's tiles
         getCurrentPlayer().replenishTiles(tileBag);
 
-
         // Clear current turn placements
         clearPlacements();
+
+        // Check if this was the first turn and validate center coverage
+        if (isFirstTurn) {
+            if (!coversCenter()) {
+                // Invalid first move; revert placements
+                revertPlacements();
+                getCurrentPlayer().deductScore(totalScore);
+                restorePlayerTiles();
+                notifyObservers("centerNotCovered");
+                return false;
+            }
+            isFirstTurn = false; // First turn completed
+        }
+
         notifyObservers("wordSubmitted");
         return true;
     }
@@ -614,7 +385,8 @@ public class Model implements Serializable {
                 }
 
                 // Print individual tile details
-                System.out.printf("Tile: %c, Position: (%d, %d), Base Score: %d, Premium: %s, Final Letter Score: %d%n", tile, pos.row, pos.col, originalLetterScore, premiumEffect, letterScore);
+                System.out.printf("Tile: %c, Position: (%d, %d), Base Score: %d, Premium: %s, Final Letter Score: %d%n",
+                        tile, pos.row, pos.col, originalLetterScore, premiumEffect, letterScore);
 
                 wordScore += letterScore; // Add letter score to the word's total score
 
@@ -632,7 +404,8 @@ public class Model implements Serializable {
             }
 
             // Print word-specific details
-            System.out.printf("Word: %s, Word Score Before Multiplier: %d, Word Multiplier: %d, Final Word Score: %d%n", word, wordScore, wordMultiplier, wordScore * wordMultiplier);
+            System.out.printf("Word: %s, Word Score Before Multiplier: %d, Word Multiplier: %d, Final Word Score: %d%n",
+                    word, wordScore, wordMultiplier, wordScore * wordMultiplier);
 
             // Apply the word multiplier to the word's total score
             total += wordScore * wordMultiplier;
@@ -765,12 +538,9 @@ public class Model implements Serializable {
     public void nextTurn() {
         if (isFirstTurn()) {
             notifyObservers("firstTurn");
-            return;
         }
 
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        getCurrentPlayer().undoHistory.clear();
-        getCurrentPlayer().history.clear();
         notifyObservers("nextTurn");
     }
 
@@ -780,7 +550,7 @@ public class Model implements Serializable {
      * @return true if the game is over, false otherwise
      */
     public boolean isGameOver() {
-        // Example condition: when the tile bag is empty and a player has less than 3 tiles
+        // Example condition: when the tile bag is empty and a player has no tiles left
         boolean status = tileBag.isEmpty() && players.stream().anyMatch(player -> player.getTiles().size() < 3);
         if (status) {
             notifyObservers("gameOver");
@@ -902,74 +672,7 @@ public class Model implements Serializable {
         return this.displayMessages;
     }
 
-    /**
-     * Gets the remaining tiles in the tile bag.
-     *
-     * @return the number of remaining tiles
-     */
     public int getRemainingTiles() {
         return tileBag.remainingTiles();
     }
-
-    /**
-     * Sets the timer mode.
-     *
-     * @param timerMode the timer mode to set
-     */
-    public void setTimerMode(boolean timerMode) {
-        this.timerMode = timerMode;
-        notifyObservers("timerModeChanged");
-    }
-
-    /**
-     * Gets the timer mode.
-     *
-     * @return the timer mode
-     */
-    public boolean isTimerMode() {
-        return timerMode;
-    }
-
-    /**
-     * Resets the timer.
-     */
-    public void resetTimer() {
-        notifyObservers("resetTimer");
-    }
-
-    /**
-     * Removes the tile at the position passed as an argument.
-     * Tile is removed as part of current player's turn.
-     *
-     * @param position
-     * @return the tile that is removed
-     */
-    public Character removeCurrentPlacementTile(Position position) {
-        return currentTurnPlacements.remove(position);
-    }
-
-    /**
-     * Removes the tile at the position passed as argument from the board.
-     *
-     * @param row
-     * @param col
-     */
-    public void removeTileFromBoard(int row, int col) {
-        board[row][col] = '\0';
-        notifyObservers("board");
-    }
-
-    /**
-     * Adds the tile at the position passed as argument to the board.
-     *
-     * @param tile
-     * @param row
-     * @param col
-     */
-    public void addTileToBoard(Character tile, int row, int col) {
-        board[row][col] = tile;
-        currentTurnPlacements.put(new Position(row, col), tile);
-        notifyObservers("board");
-    }
-
 }
