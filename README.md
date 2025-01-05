@@ -125,31 +125,14 @@ The rules of the game can be found here: [Scrabble Rules](https://en.wikipedia.o
 
 - BONUS: Timer mode was chosen as bonus and tests for timer are available in controller tests.
 
-## Contributions
 
-- **Mithushan Ravichandramohan**
-  - Auto-generated UML diagrams for project structure visualization.
-  
-- **Arjun Pathak**
-  - Added custom board display, validation and their tests.
-
-- **Manit Jawa**
-  - Conducted app testing and documented findings.
-  - Added Undo, Redo feature and their tests
-
-- **Tarek Ibrahim**
-  - Added a main menu/ui
-  - Added Save/Load Functionality and thier tests.
-  - integrated everyones code.
-  
 ## Known Bugs
   - Ai plays on top of premium squares
 
 ## BONUS:
   - you can find bonus tests in controllerTests
-  - we ALL did bonus together.
 
 
 ## License
 
-This open-source project is licensed under the Open Source License, allowing free usage and modification without any restrictions.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
